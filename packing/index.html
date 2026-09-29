@@ -13,12 +13,13 @@
     --box: #c98d4f; --box-dark: #9c6431; --box-in: #7a4a22;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; height: 100%; }
+  html { height: 100%; }
+  body { margin: 0; min-height: 100%; }  /* min-height, so the page grows and scrolls on short phones */
   body { font-family: Vazirmatn, Tahoma, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; user-select: none; -webkit-user-select: none; }
   button { font-family: inherit; cursor: pointer; border: 0; color: inherit; }
   img { -webkit-user-drag: none; }
   .app { width: 100%; max-width: 430px; min-height: 100%; display: flex; flex-direction: column; padding: 10px 16px 14px; position: relative; overflow: hidden; }
-  .screen { display: none; flex-direction: column; flex: 1; min-height: 0; }
+  .screen { display: none; flex-direction: column; flex: 1; }
   .screen.active { display: flex; }
   .screen > * { flex-shrink: 0; }
 
@@ -66,7 +67,7 @@
   .hud .title b { color: var(--text); }
   .btn-pause { background: #fff; border-radius: 12px; width: 36px; height: 36px; font-size: 15px; flex-shrink: 0; }
 
-  #play { position: relative; display: flex; flex-direction: column; touch-action: none; }
+  #play { position: relative; display: flex; flex-direction: column; }
   #play.flash::after { content: ""; position: absolute; inset: -6px; border-radius: 16px; box-shadow: inset 0 0 0 4px var(--red); pointer-events: none; animation: fadeout .6s forwards; }
   @keyframes fadeout { to { opacity: 0; } }
   .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
@@ -103,7 +104,7 @@
   .wait { margin: auto; font-size: 11px; color: #b3b5ba; text-align: center; }
 
   /* carton, seen from above: two flaps hinged at top/bottom edges */
-  .carton { position: relative; height: 86px; margin-top: 6px; perspective: 260px; }
+  .carton { position: relative; touch-action: none; height: 86px; margin-top: 6px; perspective: 260px; }
   .carton .bx { position: absolute; inset: 0; border-radius: 6px; background: var(--box-in); box-shadow: inset 0 0 0 5px var(--box), 0 3px 0 var(--box-dark); }
   .inside { position: absolute; inset: 8px; display: flex; flex-wrap: wrap; gap: 3px; align-content: center; justify-content: center; }
   .inside img, .ritem { width: 28px; height: 28px; border-radius: 6px; background: #fff; object-fit: contain; }
