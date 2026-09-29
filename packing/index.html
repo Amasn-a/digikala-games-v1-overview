@@ -107,8 +107,9 @@
   .carton { position: relative; touch-action: none; height: 86px; margin-top: 6px; perspective: 260px; }
   .carton .bx { position: absolute; inset: 0; border-radius: 6px; background: var(--box-in); box-shadow: inset 0 0 0 5px var(--box), 0 3px 0 var(--box-dark); }
   .inside { position: absolute; inset: 8px; display: flex; flex-wrap: wrap; gap: 3px; align-content: center; justify-content: center; }
-  .inside img, .ritem { width: 28px; height: 28px; border-radius: 6px; background: #fff; object-fit: contain; }
-  .ritem { position: relative; cursor: grab; touch-action: none; }
+  .inside img { width: 28px; height: 28px; border-radius: 6px; background: #fff; object-fit: contain; }
+  .ritem { position: relative; width: 34px; height: 34px; border-radius: 6px; background: #fff; cursor: grab; touch-action: none; }
+  .ritem.gone { visibility: hidden; }
   .ritem img { width: 100%; height: 100%; object-fit: contain; border-radius: 6px; }
   .ritem.marked { box-shadow: 0 0 0 2px var(--blue); }
   .ritem.marked::after { content: "↩"; position: absolute; top: -7px; left: -7px; width: 15px; height: 15px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 10px; display: grid; place-items: center; font-weight: 900; }
@@ -119,7 +120,8 @@
   .slot:not(.closed) .flap.b { transform: rotateX(172deg); }
   .tape { position: absolute; top: 50%; height: 18px; margin-top: -9px; background: repeating-linear-gradient(90deg, var(--red) 0 34px, #d92c41 34px 36px); color: #fff; font-size: 9px; font-weight: 900; overflow: hidden; white-space: nowrap; display: none; line-height: 18px; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
   .tape.on { display: block; }
-  .action { position: absolute; inset: 0; display: grid; place-items: center; }
+  .action { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }  /* only its button is tappable */
+  .action button { pointer-events: auto; }
   .act-btn { background: var(--red); color: #fff; font-weight: 900; font-size: 11px; line-height: 1.5; border-radius: 14px; padding: 6px 8px; max-width: calc(100% - 6px); box-shadow: 0 4px 10px rgba(239,57,78,.4); animation: bounce 1s infinite; }
   .act-btn.blue { background: var(--blue); box-shadow: 0 4px 10px rgba(41,121,255,.4); }
   @keyframes bounce { 50% { transform: translateY(-3px); } }
@@ -488,9 +490,10 @@
     if (o.type === 'return') {
       s.inside.innerHTML = '';
       if (s.state === 'ropen') {
-        o.contents.filter(c => !c.out).forEach(c => {
+        // removed items keep their spot (hidden) so nothing shifts under the player's finger
+        o.contents.forEach(c => {
           const r = document.createElement('div');
-          r.className = 'ritem' + (c.marked ? ' marked' : '');
+          r.className = 'ritem' + (c.marked ? ' marked' : '') + (c.out ? ' gone' : '');
           r.innerHTML = `<img src="${c.item.img}" alt="">`;
           r.addEventListener('pointerdown', e => startDrag(e, { kind: 'carton', slot: s, entry: c, el: r }));
           s.inside.appendChild(r);
@@ -578,7 +581,7 @@
   function loop(ts) {
     const dt = Math.min(0.05, (ts - lastTs) / 1000);
     lastTs = ts;
-    if (!G.paused && !G.over) step(dt);
+    if (!G.paused && !G.over && !G.frozen) step(dt);   // frozen: debug-only, for tests
     rafId = requestAnimationFrame(loop);
   }
 
