@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سه بازی دیجی‌کالا</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --red: #ef394e; --bg: #f1f2f4; --text: #23254e; --muted: #81858b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Vazirmatn, Tahoma, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; }
+  .app { width: 100%; max-width: 460px; padding: 14px 16px 24px; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-weight: 900; color: var(--red); font-size: 22px; }
+  .wallet { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 99px; padding: 6px 14px 6px 8px; font-weight: 900; font-size: 15px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .coin { width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe082, #f9a825 60%, #e08e00); display: grid; place-items: center; color: #7a4d00; font-size: 12px; font-weight: 900; }
+  h1 { font-size: 24px; margin: 22px 0 4px; font-weight: 900; }
+  .sub { margin: 0 0 16px; color: var(--muted); font-size: 13px; line-height: 1.9; }
+  .game { display: block; text-decoration: none; color: inherit; background: #fff; border-radius: 22px; overflow: hidden; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.05); transition: transform .12s; }
+  .game:active { transform: scale(.98); }
+  .cover { height: 132px; background: center/cover; position: relative; }
+  .cover .num { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,.55); color: #fff; font-weight: 900; font-size: 12px; border-radius: 99px; padding: 3px 10px; }
+  .body { padding: 14px 16px 16px; }
+  .body h2 { margin: 0 0 4px; font-size: 19px; font-weight: 900; }
+  .body p { margin: 0; font-size: 12.5px; color: #4b4d6b; line-height: 1.9; }
+  .row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 8px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { background: var(--bg); border-radius: 99px; padding: 3px 10px; font-size: 11px; font-weight: 700; color: var(--muted); }
+  .play { background: var(--red); color: #fff; font-weight: 900; font-size: 14px; border-radius: 12px; padding: 9px 18px; white-space: nowrap; }
+  .rec { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .rec b { color: var(--text); }
+  .note { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.9; margin-top: 18px; }
+  /* cover art */
+  .c1 { background: linear-gradient(135deg, #ef394e, #ff8a5b); display: grid; place-items: center; }
+  .c1 .cards { display: flex; gap: 10px; align-items: center; }
+  .c1 .cards img { width: 70px; height: 70px; object-fit: contain; background: #fff; border-radius: 14px; box-shadow: 0 6px 16px rgba(0,0,0,.2); }
+  .c1 .vs { color: #fff; font-weight: 900; font-size: 22px; }
+  .c3 { background: linear-gradient(135deg, #b7672a, #ef394e); display: grid; place-items: center; font-size: 64px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">دیجی‌کالا</div>
+    <div class="wallet" title="کیف پول مشترک همه‌ی بازی‌ها"><span class="coin">D</span><span id="coins"></span></div>
+  </div>
+
+  <h1>کدام بازی؟ 🎮</h1>
+  <p class="sub">سه بازی درون‌برنامه‌ای. دیجی‌کوین‌های کیف پول بین هر سه بازی مشترک است.</p>
+
+  <a class="game" href="qeymat-shenas/">
+    <div class="cover c1"><span class="num">بازی ۱</span>
+      <div class="cards"><img id="p1" alt=""><span class="vs">▲▼</span><img id="p2" alt=""></div>
+    </div>
+    <div class="body">
+      <h2>قیمت‌شناس</h2>
+      <p>قیمت کالای جدید از کالای قبلی بیشتر است یا کمتر؟ فقط ۵ ثانیه وقت داری. طولانی‌ترین زنجیره‌ی پاسخ درست را بساز.</p>
+      <div class="row"><div class="chips"><span class="chip">⚡ سرعتی</span><span class="chip">⏱ ۵ ثانیه</span></div><span class="play">بازی کن</span></div>
+      <div class="rec" id="r1"></div>
+    </div>
+  </a>
+
+  <a class="game" href="puzzle/">
+    <div class="cover" style="background-image:url(puzzle/img/b3.jpg);background-position:45% 50%"><span class="num">بازی ۲</span></div>
+    <div class="body">
+      <h2>پازل کشویی</h2>
+      <p>یک تصویر دیجی‌کالا به‌هم ریخته. قطعه‌ها را کنار خانه‌ی خالی جابه‌جا کن تا کامل شود. ۳×۳، ۴×۴ یا ۵×۵.</p>
+      <div class="row"><div class="chips"><span class="chip">🧠 فکری</span><span class="chip">🗓 پازل روزانه</span></div><span class="play">بازی کن</span></div>
+      <div class="rec" id="r2"></div>
+    </div>
+  </a>
+
+  <a class="game" href="packing/">
+    <div class="cover c3"><span class="num">بازی ۳</span>📦</div>
+    <div class="body">
+      <h2>مرکز بسته‌بندی</h2>
+      <p>کالاها را از نوار نقاله بردار، داخل کارتن سفارش درست بگذار، چسب بزن و بفرست. سفارش فوری، طلایی و مرجوعی هم داریم!</p>
+      <div class="row"><div class="chips"><span class="chip">⚡ سرعتی</span><span class="chip">❤️ سه جان</span><span class="chip">🗓 سه فرصت در روز</span></div><span class="play">بازی کن</span></div>
+      <div class="rec" id="r3"></div>
+    </div>
+  </a>
+
+  <p class="note">نمونه‌ی اولیه‌ی پیشنهادی (پروتوتایپ) بر اساس پروپوزال «سه بازی درون‌برنامه‌ای دیجی‌کالا» · محصول رسمی دیجی‌کالا نیست.<br>رکوردها و دیجی‌کوین‌ها فقط روی همین دستگاه ذخیره می‌شوند.</p>
+</div>
+
+<script src="wallet.js"></script>
+<script src="qeymat-shenas/products.js"></script>
+<script>
+  const fa = n => Number(n).toLocaleString('fa-IR');
+  const get = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } };
+  document.getElementById('coins').textContent = fa(Wallet.get());
+
+  const P = window.PRODUCTS || [];
+  if (P.length) {
+    const a = P[Math.floor(Math.random() * P.length)], b = P[Math.floor(Math.random() * P.length)];
+    document.getElementById('p1').src = 'qeymat-shenas/' + a.image;
+    document.getElementById('p2').src = 'qeymat-shenas/' + b.image;
+  }
+  const rec = get('qs_record', 0);
+  document.getElementById('r1').innerHTML = rec ? `رکورد تو: <b>${fa(rec)}</b> پاسخ درست` : '';
+  const best = [3, 4, 5].map(n => [n, get('pz_best' + n, null)]).filter(x => x[1]);
+  document.getElementById('r2').innerHTML = best.map(([n, b]) => `${fa(n)}×${fa(n)}: <b>${fa(b.moves)}</b> حرکت`).join(' · ');
+  const pk = get('pk_best', 0);
+  document.getElementById('r3').innerHTML = pk ? `بهترین امتیاز: <b>${fa(pk)}</b>` : '';
+</script>
+</body>
+</html>

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>قیمت‌شناس دیجی‌کالا</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #ef394e;
+    --red-dark: #c9253a;
+    --green: #00a049;
+    --amber: #f9a825;
+    --bg: #f1f2f4;
+    --card: #fff;
+    --text: #23254e;
+    --muted: #81858b;
+    --line: #e0e0e2;
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: Vazirmatn, Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex; justify-content: center;
+    user-select: none;
+  }
+  button { font-family: inherit; cursor: pointer; border: 0; }
+  .app {
+    width: 100%; max-width: 430px; min-height: 100%;
+    display: flex; flex-direction: column;
+    padding: 12px 16px 20px;
+    position: relative; overflow: hidden;
+  }
+  .screen { display: none; flex-direction: column; flex: 1; }
+  .screen.active { display: flex; }
+
+  /* ---------- top bar ---------- */
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .logo { font-weight: 900; color: var(--red); font-size: 20px; letter-spacing: -.5px; }
+  .logo small { color: var(--text); font-weight: 600; font-size: 13px; margin-right: 6px; }
+  .coins {
+    display: flex; align-items: center; gap: 6px;
+    background: #fff; border-radius: 99px; padding: 5px 12px 5px 8px;
+    font-weight: 800; font-size: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .coin-ico {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffe082, #f9a825 60%, #e08e00);
+    display: grid; place-items: center; color: #7a4d00; font-size: 11px; font-weight: 900;
+  }
+
+  /* ---------- start screen ---------- */
+  .hero {
+    background: linear-gradient(160deg, var(--red), #ff6a5b);
+    color: #fff; border-radius: 24px; padding: 28px 22px 24px; margin-top: 6px;
+    position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content: "?"; position: absolute; left: -10px; bottom: -60px;
+    font-size: 220px; font-weight: 900; opacity: .12;
+  }
+  .hero h1 { margin: 0 0 6px; font-size: 32px; font-weight: 900; }
+  .hero p { margin: 0; line-height: 1.9; font-size: 14px; opacity: .95; }
+  .chips { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .chip { background: rgba(255,255,255,.2); border-radius: 99px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+  .rules { background: #fff; border-radius: var(--radius); padding: 16px 18px; margin-top: 14px; }
+  .rules h3 { margin: 0 0 10px; font-size: 15px; }
+  .rules ol { margin: 0; padding-right: 20px; font-size: 13px; line-height: 2.1; color: #3f4064; }
+  .titles-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+  .title-badge {
+    background: #fff; border-radius: 14px; padding: 10px 4px; text-align: center; font-size: 11px; color: var(--muted);
+    border: 1.5px dashed var(--line);
+  }
+  .title-badge b { display: block; font-size: 18px; color: var(--text); }
+  .title-badge.got { border: 1.5px solid var(--amber); background: #fffaf0; color: #8a5a00; }
+  .stats-line { display: flex; justify-content: space-around; margin-top: 14px; font-size: 12px; color: var(--muted); text-align: center; }
+  .stats-line b { display: block; font-size: 20px; color: var(--text); }
+  .spacer { flex: 1; min-height: 16px; }
+  .btn-primary {
+    background: var(--red); color: #fff; font-size: 17px; font-weight: 800;
+    border-radius: 14px; padding: 15px; width: 100%;
+    box-shadow: 0 6px 16px rgba(239,57,78,.35); transition: transform .1s;
+  }
+  .btn-primary:active { transform: scale(.97); }
+  .btn-ghost { background: #fff; color: var(--text); font-weight: 700; border-radius: 14px; padding: 13px; width: 100%; font-size: 15px; }
+
+  /* ---------- game screen ---------- */
+  .hud { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .streak {
+    background: #fff; border-radius: 12px; padding: 6px 12px; font-weight: 800; font-size: 14px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .streak .n { color: var(--red); font-size: 18px; }
+  .cur-title { font-size: 12px; color: var(--muted); flex: 1; }
+  .cur-title b { color: var(--text); }
+  .stack { position: relative; display: flex; flex-direction: column; gap: 10px; }
+  .pcard {
+    background: var(--card); border-radius: var(--radius); padding: 12px;
+    display: flex; gap: 12px; align-items: center; min-height: 128px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    position: relative; overflow: hidden;
+    transition: transform .45s cubic-bezier(.3,.9,.3,1), opacity .35s, box-shadow .3s;
+  }
+  .pcard .img {
+    width: 104px; height: 104px; border-radius: 12px; flex-shrink: 0; background: #fafafa;
+    display: grid; place-items: center; overflow: hidden;
+  }
+  .pcard .img img { width: 100%; height: 100%; object-fit: contain; }
+  .pcard .info { flex: 1; min-width: 0; }
+  .pcard .cat { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .pcard .name {
+    font-size: 13px; font-weight: 600; line-height: 1.8;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .pcard .price { margin-top: 6px; font-size: 19px; font-weight: 900; }
+  .pcard .price small { font-size: 11px; font-weight: 600; color: var(--muted); margin-right: 3px; }
+  .pcard .price.hidden-price { color: #c0c2c5; letter-spacing: 2px; }
+  .ref-label {
+    position: absolute; top: 10px; left: 10px; font-size: 10px; font-weight: 700;
+    background: #f0f0f1; color: var(--muted); padding: 2px 8px; border-radius: 99px;
+  }
+  .pcard.challenger { min-height: 150px; }
+  .pcard.challenger.locked .img, .pcard.challenger.locked .info { filter: blur(9px); opacity: .6; }
+  .reveal-cover {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    background: rgba(255,255,255,.35); z-index: 2;
+  }
+  .btn-reveal {
+    background: var(--text); color: #fff; font-weight: 800; font-size: 15px; padding: 12px 26px; border-radius: 99px;
+    box-shadow: 0 6px 14px rgba(35,37,78,.3); animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  .pcard.correct { box-shadow: 0 0 0 3px var(--green), 0 8px 20px rgba(0,160,73,.25); }
+  .pcard.wrong { box-shadow: 0 0 0 3px var(--red), 0 8px 20px rgba(239,57,78,.25); animation: shake .4s; }
+  @keyframes shake { 25% { transform: translateX(6px); } 50% { transform: translateX(-6px); } 75% { transform: translateX(3px); } }
+  .pcard .price.up { color: var(--green); }
+  .pcard .price.down { color: var(--red); }
+  .diff { font-size: 11px; font-weight: 700; margin-top: 2px; }
+
+  .vs {
+    align-self: center; margin: -20px 0; z-index: 3;
+    width: 40px; height: 40px; border-radius: 50%; background: var(--bg);
+    display: grid; place-items: center; font-weight: 900; font-size: 13px; color: var(--muted);
+  }
+  .question { text-align: center; font-weight: 800; font-size: 16px; margin: 14px 0 8px; min-height: 26px; }
+
+  /* timer */
+  .timer { height: 10px; background: #e3e4e7; border-radius: 99px; overflow: hidden; margin: 4px 0 12px; position: relative; }
+  .timer .bar { height: 100%; width: 100%; background: var(--green); border-radius: 99px; transform-origin: right; }
+  .timer .bar.warn { background: var(--amber); }
+  .timer .bar.danger { background: var(--red); }
+  .timer-num { text-align: center; font-weight: 900; font-size: 13px; color: var(--muted); margin-top: -6px; margin-bottom: 6px; height: 18px; }
+
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .choice {
+    border-radius: 16px; padding: 14px 8px; font-size: 18px; font-weight: 900; color: #fff;
+    display: flex; flex-direction: column; align-items: center; gap: 2px; position: relative;
+    transition: transform .1s, opacity .2s, box-shadow .2s;
+  }
+  .choice:active { transform: scale(.96); }
+  .choice .arrow { font-size: 22px; line-height: 1; }
+  .choice .pct { font-size: 12px; font-weight: 700; opacity: .95; min-height: 16px; }
+  .choice.more { background: var(--green); }
+  .choice.less { background: var(--red); }
+  .choice:disabled { opacity: .35; cursor: default; }
+  .choice.hint { box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--amber); animation: pulse 1s infinite; }
+  .choice.picked { opacity: 1 !important; box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--text); }
+
+  .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .tool {
+    background: #fff; border-radius: 14px; padding: 10px; text-align: right;
+    display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--text);
+    border: 1.5px solid transparent;
+  }
+  .tool .ico { font-size: 20px; }
+  .tool .cost { margin-right: auto; display: flex; align-items: center; gap: 3px; font-weight: 900; }
+  .tool .cost .coin-ico { width: 16px; height: 16px; font-size: 9px; }
+  .tool:disabled { opacity: .4; cursor: default; }
+  .tool.used { border-color: var(--amber); opacity: .7; }
+
+  /* toast */
+  .toast {
+    position: absolute; top: 70px; left: 50%; transform: translate(-50%, -30px) scale(.9);
+    background: var(--text); color: #fff; padding: 12px 20px; border-radius: 16px; font-weight: 800;
+    font-size: 14px; opacity: 0; pointer-events: none; transition: all .35s cubic-bezier(.3,1.4,.5,1);
+    z-index: 50; text-align: center; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  .toast .big { display: block; font-size: 22px; color: #ffd54f; }
+
+  /* ---------- end screen ---------- */
+  .end-head { text-align: center; padding: 18px 0 6px; }
+  .end-head .emoji { font-size: 54px; }
+  .end-head h2 { margin: 4px 0 2px; font-size: 24px; font-weight: 900; }
+  .end-head p { margin: 0; color: var(--muted); font-size: 13px; }
+  .end-reason { margin-top: 8px; font-size: 12px; background: #fff; display: inline-block; padding: 4px 12px; border-radius: 99px; color: var(--red); font-weight: 700; }
+  .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .stat { background: #fff; border-radius: 16px; padding: 12px; }
+  .stat .k { font-size: 11px; color: var(--muted); }
+  .stat .v { font-size: 20px; font-weight: 900; margin-top: 2px; }
+  .stat .v.sm { font-size: 14px; line-height: 1.7; }
+  .stat.wide { grid-column: span 2; display: flex; align-items: center; justify-content: space-between; }
+  .rank-bar { height: 8px; background: #eee; border-radius: 99px; margin-top: 8px; overflow: hidden; }
+  .rank-bar div { height: 100%; background: linear-gradient(270deg, var(--amber), var(--red)); border-radius: 99px; transition: width 1s; }
+  .seen { background: #fff; border-radius: 16px; padding: 12px; margin-top: 10px; }
+  .seen h4 { margin: 0 0 8px; font-size: 13px; }
+  .seen-list { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+  .seen-item { flex: 0 0 88px; text-decoration: none; color: var(--text); font-size: 10px; text-align: center; }
+  .seen-item img { width: 88px; height: 88px; object-fit: contain; background: #fafafa; border-radius: 10px; }
+  .seen-item div { font-weight: 800; font-size: 11px; margin-top: 2px; }
+  .end-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .end-actions .btn-primary { grid-column: span 2; }
+
+  /* confetti */
+  .confetti { position: absolute; top: -10px; width: 8px; height: 14px; z-index: 60; pointer-events: none; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+
+  .modal-bg {
+    position: absolute; inset: 0; background: rgba(20,20,40,.5); display: none; align-items: flex-end; z-index: 70;
+  }
+  .modal-bg.show { display: flex; }
+  .modal { background: #fff; width: 100%; border-radius: 24px 24px 0 0; padding: 22px 18px; text-align: center; }
+  .modal h3 { margin: 0 0 8px; }
+  .modal p { color: var(--muted); font-size: 13px; line-height: 1.9; margin: 0 0 14px; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <div class="topbar">
+    <a class="logo" href="../" style="text-decoration:none" title="بازگشت به همه‌ی بازی‌ها">‹ دیجی‌کالا<small>قیمت‌شناس</small></a>
+    <div class="coins"><span class="coin-ico">D</span><span id="coinCount">۰</span></div>
+  </div>
+
+  <!-- START -->
+  <section class="screen active" id="scrStart">
+    <div class="hero">
+      <h1>قیمت‌شناس</h1>
+      <p>قیمت کالای جدید از کالای قبلی <b>بیشتر</b> است یا <b>کمتر</b>؟<br>فقط ۵ ثانیه وقت داری. زنجیره را تا جایی که می‌توانی ادامه بده!</p>
+      <div class="chips"><span class="chip">⚡ سرعتی</span><span class="chip">⏱ ۵ ثانیه برای هر تصمیم</span><span class="chip">🛒 کالاهای واقعی</span></div>
+    </div>
+    <div class="rules">
+      <h3>چطور بازی کنم؟</h3>
+      <ol>
+        <li>کالای مرجع با قیمتش نمایش داده می‌شود.</li>
+        <li>«نمایش بده» را بزن تا کالای بعدی رو شود؛ تایمر ۵ ثانیه‌ای شروع می‌شود.</li>
+        <li>«بیشتر» یا «کمتر» را انتخاب کن. پاسخ درست ← کالای جدید مرجع می‌شود.</li>
+        <li>پاسخ اشتباه یا تمام شدن زمان = پایان دست.</li>
+      </ol>
+    </div>
+    <div class="titles-row" id="titlesRow"></div>
+    <div class="stats-line">
+      <div><b id="sRecord">۰</b>رکورد شخصی</div>
+      <div><b id="sStreak">۰</b>روز پشت‌سرهم</div>
+      <div><b id="sPlays">۰</b>دست بازی</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn-primary" id="btnStart">شروع بازی</button>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="scrGame">
+    <div class="hud">
+      <div class="streak">🔥 <span class="n" id="gStreak">۰</span> پاسخ درست</div>
+      <div class="cur-title" id="gTitle">عنوان: <b>—</b></div>
+    </div>
+    <div class="stack" id="stack"></div>
+    <div class="question" id="question">&nbsp;</div>
+    <div class="timer"><div class="bar" id="timerBar"></div></div>
+    <div class="timer-num" id="timerNum"></div>
+    <div class="choices">
+      <button class="choice more" id="btnMore" disabled><span class="arrow">▲</span>بیشتر<span class="pct" id="pctMore"></span></button>
+      <button class="choice less" id="btnLess" disabled><span class="arrow">▼</span>کمتر<span class="pct" id="pctLess"></span></button>
+    </div>
+    <div class="tools">
+      <button class="tool" id="toolPoll" disabled><span class="ico">👥</span>نظر کاربران<span class="cost">۲<span class="coin-ico">D</span></span></button>
+      <button class="tool" id="toolAnswer" disabled><span class="ico">💡</span>جواب درست<span class="cost">۵<span class="coin-ico">D</span></span></button>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section class="screen" id="scrEnd">
+    <div class="end-head">
+      <div class="emoji" id="eEmoji">🎉</div>
+      <h2>این دست تموم شد!</h2>
+      <p id="eSub"></p>
+      <div class="end-reason" id="eReason"></div>
+    </div>
+    <div class="grid-stats">
+      <div class="stat"><div class="k">پاسخ‌های درست</div><div class="v" id="eCorrect">۰</div></div>
+      <div class="stat"><div class="k">رکورد شخصی</div><div class="v" id="eRecord">۰</div></div>
+      <div class="stat"><div class="k">آخرین عنوان</div><div class="v sm" id="eTitle">—</div></div>
+      <div class="stat"><div class="k">دیجی‌کوین دریافتی</div><div class="v" id="eCoins">۰</div></div>
+      <div class="stat"><div class="k">دسته‌بندی تخصصی تو</div><div class="v sm" id="eCat">—</div></div>
+      <div class="stat"><div class="k">استریک روزانه</div><div class="v" id="eStreak">۰</div></div>
+      <div class="stat wide">
+        <div style="flex:1">
+          <div class="k">مقایسه با سایر کاربران</div>
+          <div class="v sm" id="eRank"></div>
+          <div class="rank-bar"><div id="eRankBar" style="width:0"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="seen">
+      <h4>کالاهای این دست</h4>
+      <div class="seen-list" id="eSeen"></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="end-actions">
+      <button class="btn-ghost" id="btnShare">اشتراک‌گذاری نتیجه</button>
+      <button class="btn-ghost" id="btnHome">خانه</button>
+      <button class="btn-primary" id="btnAgain">شروع مجدد</button>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modal-bg" id="modal">
+    <div class="modal">
+      <h3 id="mTitle"></h3>
+      <p id="mText"></p>
+      <button class="btn-primary" id="mOk">باشه</button>
+    </div>
+  </div>
+</div>
+
+<script src="../wallet.js"></script>
+<script src="products.js"></script>
+<script>
+(() => {
+  const ROUND_TIME = 5000;
+  const COST_POLL = 2, COST_ANSWER = 5;
+  // Checkpoint titles from the proposal: 3, 5, 7, 10 correct answers
+  const TITLES = [
+    { at: 3, name: 'خفن', reward: 1 },
+    { at: 5, name: 'بازاری', reward: 2 },
+    { at: 7, name: 'قیمت‌شناس', reward: 3 },
+    { at: 10, name: 'سلطان قیمت', reward: 5 },
+  ];
+
+  const $ = id => document.getElementById(id);
+  const fa = n => Number(n).toLocaleString('fa-IR');
+  const toman = n => fa(n);
+
+  // ---------- persistence ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('qs_' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem('qs_' + k, JSON.stringify(v)); } catch {} },
+  };
+  let coins = Wallet.get();
+  const saveCoins = () => { Wallet.set(coins); $('coinCount').textContent = fa(coins); };
+
+  // Product pool: drop items with abnormal prices, and duplicate prices
+  const POOL = (window.PRODUCTS || []).filter(p => p.price >= 10000 && p.price < 1e10);
+
+  // ---------- game state ----------
+  let S = null;
+  let timerRAF = null, timerStart = 0;
+
+  function newSession() {
+    return {
+      streak: 0, ref: null, next: null, used: new Set(), seen: [],
+      phase: 'locked', // locked | question | resolved
+      toolsUsed: { poll: false, answer: false },
+      coinsEarned: 0, coinsSpent: 0, hintsUsed: 0,
+      catWins: {}, title: null, reason: '',
+    };
+  }
+
+  // Difficulty: price-ratio window narrows and categories get closer as the chain grows
+  function pickNext(ref, streak) {
+    const cands = POOL.filter(p => !S.used.has(p.id) && p.price !== ref.price);
+    const ratio = p => Math.max(p.price, ref.price) / Math.min(p.price, ref.price);
+    let tiers;
+    if (streak < 3) tiers = [p => ratio(p) >= 1.8, p => ratio(p) >= 1.4];
+    else if (streak < 6) tiers = [p => ratio(p) >= 1.25 && ratio(p) <= 4, p => ratio(p) >= 1.15];
+    else if (streak < 10) tiers = [p => p.group === ref.group && ratio(p) <= 2, p => ratio(p) >= 1.05 && ratio(p) <= 1.6];
+    else tiers = [p => p.group === ref.group && ratio(p) <= 1.35, p => ratio(p) <= 1.3];
+    for (const t of tiers) {
+      const f = cands.filter(t);
+      if (f.length) return f[Math.floor(Math.random() * f.length)];
+    }
+    return cands.length ? cands[Math.floor(Math.random() * cands.length)] : null;
+  }
+
+  function pickFirst() {
+    // Start from a mid-priced, familiar item so the first question is easy
+    const mid = POOL.filter(p => p.price > 300000 && p.price < 20000000);
+    const list = mid.length ? mid : POOL;
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  // ---------- rendering ----------
+  function shortTitle(t) { return t.length > 90 ? t.slice(0, 88) + '…' : t; }
+
+  function cardHTML(p, { showPrice, isRef, locked }) {
+    return `
+      <div class="img"><img src="${p.image}" alt="" draggable="false"></div>
+      <div class="info">
+        <div class="cat">${p.category}${p.brand && p.brand !== 'متفرقه' ? ' · ' + p.brand : ''}</div>
+        <div class="name">${shortTitle(p.title)}</div>
+        <div class="price ${showPrice ? '' : 'hidden-price'}">${showPrice ? toman(p.price) + '<small>تومان</small>' : '؟؟؟ <small>تومان</small>'}</div>
+      </div>
+      ${isRef ? '<span class="ref-label">کالای مرجع</span>' : ''}
+      ${locked ? '<div class="reveal-cover"><button class="btn-reveal" id="btnReveal">نمایش بده 👀</button></div>' : ''}
+    `;
+  }
+
+  function renderStack() {
+    const stack = $('stack');
+    stack.innerHTML = '';
+    const refEl = document.createElement('div');
+    refEl.className = 'pcard ref';
+    refEl.innerHTML = cardHTML(S.ref, { showPrice: true, isRef: true });
+    const vs = document.createElement('div');
+    vs.className = 'vs'; vs.textContent = 'VS';
+    const chEl = document.createElement('div');
+    chEl.className = 'pcard challenger locked';
+    chEl.id = 'challenger';
+    chEl.innerHTML = cardHTML(S.next, { showPrice: false, locked: true });
+    stack.append(refEl, vs, chEl);
+    $('btnReveal').onclick = reveal;
+  }
+
+  function renderHud() {
+    $('gStreak').textContent = fa(S.streak);
+    $('gTitle').innerHTML = 'عنوان: <b>' + (S.title || '—') + '</b>';
+  }
+
+  function setChoicesEnabled(on) {
+    $('btnMore').disabled = $('btnLess').disabled = !on;
+    $('toolPoll').disabled = !on || S.toolsUsed.poll || coins < COST_POLL;
+    $('toolAnswer').disabled = !on || S.toolsUsed.answer || coins < COST_ANSWER;
+  }
+
+  function resetQuestionUI() {
+    S.toolsUsed = { poll: false, answer: false };
+    ['btnMore', 'btnLess'].forEach(id => $(id).classList.remove('hint', 'picked'));
+    ['toolPoll', 'toolAnswer'].forEach(id => $(id).classList.remove('used'));
+    $('pctMore').textContent = $('pctLess').textContent = '';
+    $('question').innerHTML = 'کالای بعدی رو ببین!';
+    const bar = $('timerBar');
+    bar.style.transform = 'scaleX(1)';
+    bar.className = 'bar';
+    $('timerNum').textContent = '';
+    setChoicesEnabled(false);
+  }
+
+  // ---------- flow ----------
+  function startGame() {
+    S = newSession();
+    S.ref = pickFirst();
+    S.used.add(S.ref.id);
+    S.seen.push(S.ref);
+    S.next = pickNext(S.ref, 0);
+    S.used.add(S.next.id);
+    show('scrGame');
+    renderHud();
+    renderStack();
+    resetQuestionUI();
+  }
+
+  function reveal() {
+    if (S.phase !== 'locked') return;
+    S.phase = 'question';
+    const ch = $('challenger');
+    ch.classList.remove('locked');
+    ch.querySelector('.reveal-cover').remove();
+    $('question').innerHTML = 'قیمتش از کالای مرجع <b style="color:var(--green)">بیشتر</b> است یا <b style="color:var(--red)">کمتر</b>؟';
+    setChoicesEnabled(true);
+    startTimer();
+  }
+
+  function startTimer() {
+    timerStart = performance.now();
+    const bar = $('timerBar');
+    const tick = now => {
+      const left = Math.max(0, ROUND_TIME - (now - timerStart));
+      const frac = left / ROUND_TIME;
+      bar.style.transform = `scaleX(${frac})`;
+      bar.className = 'bar' + (frac < .25 ? ' danger' : frac < .5 ? ' warn' : '');
+      $('timerNum').textContent = fa(Math.ceil(left / 1000)) + ' ثانیه';
+      if (left <= 0) { answer(null); return; }
+      timerRAF = requestAnimationFrame(tick);
+    };
+    timerRAF = requestAnimationFrame(tick);
+  }
+  const stopTimer = () => cancelAnimationFrame(timerRAF);
+
+  function answer(choice) {
+    if (S.phase !== 'question') return;
+    S.phase = 'resolved';
+    stopTimer();
+    setChoicesEnabled(false);
+    const isMore = S.next.price > S.ref.price;
+    const correct = choice !== null && (choice === 'more') === isMore;
+    if (choice) $(choice === 'more' ? 'btnMore' : 'btnLess').classList.add('picked');
+
+    // Reveal the real price with a count-up
+    const ch = $('challenger');
+    const priceEl = ch.querySelector('.price');
+    priceEl.classList.remove('hidden-price');
+    priceEl.classList.add(isMore ? 'up' : 'down');
+    countUp(priceEl, S.next.price, 650);
+    const pct = Math.round(Math.abs(S.next.price - S.ref.price) / S.ref.price * 100);
+    const diff = document.createElement('div');
+    diff.className = 'diff';
+    diff.style.color = isMore ? 'var(--green)' : 'var(--red)';
+    diff.textContent = (isMore ? '▲ ' : '▼ ') + fa(pct) + '٪ ' + (isMore ? 'گران‌تر' : 'ارزان‌تر');
+    ch.querySelector('.info').appendChild(diff);
+    S.seen.push(S.next);
+
+    if (correct) {
+      ch.classList.add('correct');
+      S.streak++;
+      S.catWins[S.next.group] = (S.catWins[S.next.group] || 0) + 1;
+      $('question').innerHTML = '<span style="color:var(--green)">✔ درسته!</span>';
+      renderHud();
+      const t = TITLES.find(t => t.at === S.streak);
+      if (t) unlockTitle(t);
+      setTimeout(advance, t ? 1700 : 1150);
+    } else {
+      ch.classList.add('wrong');
+      S.reason = choice === null ? '⏱ زمان تمام شد' : '✖ پاسخ اشتباه بود';
+      $('question').innerHTML = `<span style="color:var(--red)">${S.reason}</span>`;
+      setTimeout(endGame, 1600);
+    }
+  }
+
+  function advance() {
+    // Challenger becomes the new reference; a new hidden card appears below it
+    S.ref = S.next;
+    S.next = pickNext(S.ref, S.streak);
+    if (!S.next) { S.reason = '🏁 همه‌ی کالاها را دیدی!'; endGame(); return; }
+    S.used.add(S.next.id);
+    S.phase = 'locked';
+    const stack = $('stack');
+    stack.style.opacity = 0;
+    stack.style.transform = 'translateY(-16px)';
+    stack.style.transition = 'all .2s';
+    setTimeout(() => {
+      renderStack();
+      resetQuestionUI();
+      stack.style.transform = 'translateY(16px)';
+      requestAnimationFrame(() => { stack.style.opacity = 1; stack.style.transform = 'none'; });
+    }, 200);
+  }
+
+  function unlockTitle(t) {
+    S.title = t.name;
+    S.coinsEarned += t.reward;
+    coins += t.reward; saveCoins();
+    const got = store.get('titles', []);
+    if (!got.includes(t.name)) { got.push(t.name); store.set('titles', got); }
+    renderHud();
+    toast(`<span class="big">🏅 ${t.name}</span>عنوان جدید باز شد · +${fa(t.reward)} دیجی‌کوین`);
+    confetti(40);
+  }
+
+  // ---------- tools ----------
+  function useTool(kind) {
+    if (S.phase !== 'question' || S.toolsUsed[kind]) return;
+    const cost = kind === 'poll' ? COST_POLL : COST_ANSWER;
+    if (coins < cost) return;
+    coins -= cost; saveCoins();
+    S.coinsSpent += cost; S.hintsUsed++;
+    S.toolsUsed[kind] = true;
+    $(kind === 'poll' ? 'toolPoll' : 'toolAnswer').classList.add('used');
+    const isMore = S.next.price > S.ref.price;
+    if (kind === 'poll') {
+      // Simulated crowd: bigger price gaps -> crowd is more often right, never guaranteed
+      const r = Math.max(S.next.price, S.ref.price) / Math.min(S.next.price, S.ref.price);
+      let right = 50 + Math.min(35, Math.log2(r) * 18) + (Math.random() * 30 - 15);
+      right = Math.round(Math.max(22, Math.min(92, right)));
+      const more = isMore ? right : 100 - right;
+      $('pctMore').textContent = fa(more) + '٪ کاربران';
+      $('pctLess').textContent = fa(100 - more) + '٪ کاربران';
+    } else {
+      $(isMore ? 'btnMore' : 'btnLess').classList.add('hint');
+    }
+    setChoicesEnabled(true);
+  }
+
+  // ---------- end ----------
+  function endGame() {
+    stopTimer();
+    const prevRecord = store.get('record', 0);
+    const newRecord = S.streak > prevRecord;
+    if (newRecord) store.set('record', S.streak);
+    store.set('plays', store.get('plays', 0) + 1);
+    const dayStreak = updateDayStreak();
+
+    $('eEmoji').textContent = S.streak >= 10 ? '👑' : S.streak >= 5 ? '🎉' : S.streak >= 3 ? '😎' : '🙃';
+    $('eSub').textContent = newRecord && S.streak > 0 ? 'رکورد جدید ثبت کردی! 🔥' : `رکورد تو: ${fa(Math.max(prevRecord, S.streak))} پاسخ درست`;
+    $('eReason').textContent = S.reason;
+    $('eCorrect').textContent = fa(S.streak);
+    $('eRecord').textContent = fa(Math.max(prevRecord, S.streak));
+    $('eTitle').textContent = S.title || 'هنوز عنوانی نگرفتی';
+    $('eCoins').textContent = (S.coinsEarned >= 0 ? '+' : '') + fa(S.coinsEarned);
+    $('eStreak').textContent = fa(dayStreak) + ' روز';
+    const best = Object.entries(S.catWins).sort((a, b) => b[1] - a[1])[0];
+    $('eCat').textContent = best ? `${best[0]} (${fa(best[1])} درست)` : '—';
+
+    // Comparison against a simulated player distribution (prototype, no backend)
+    const beat = Math.round(100 * (1 - Math.exp(-S.streak / 3.2)));
+    $('eRank').innerHTML = `بهتر از ${fa(beat)}٪ بازیکنان<br><span style="font-weight:600;color:var(--muted);font-size:12px">${S.hintsUsed ? `${fa(S.hintsUsed)} بار از کمک استفاده کردی` : 'بدون هیچ کمکی 💪'}</span>`;
+    setTimeout(() => $('eRankBar').style.width = beat + '%', 100);
+
+    $('eSeen').innerHTML = S.seen.map(p => `
+      <a class="seen-item" href="${p.url}" target="_blank" rel="noopener">
+        <img src="${p.image}" alt=""><div>${toman(p.price)}</div>تومان
+      </a>`).join('');
+
+    show('scrEnd');
+    if (newRecord && S.streak >= 3) confetti(70);
+  }
+
+  function updateDayStreak() {
+    const today = new Date().toISOString().slice(0, 10);
+    const last = store.get('lastDay', null);
+    let ds = store.get('dayStreak', 0);
+    if (last !== today) {
+      const y = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+      ds = last === y ? ds + 1 : 1;
+      store.set('lastDay', today); store.set('dayStreak', ds);
+    }
+    return ds;
+  }
+
+  // ---------- helpers ----------
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+    if (id === 'scrStart') renderStart();
+  }
+
+  function renderStart() {
+    const got = store.get('titles', []);
+    $('titlesRow').innerHTML = TITLES.map(t =>
+      `<div class="title-badge ${got.includes(t.name) ? 'got' : ''}"><b>${fa(t.at)}</b>${got.includes(t.name) ? '🏅 ' : '🔒 '}${t.name}</div>`).join('');
+    $('sRecord').textContent = fa(store.get('record', 0));
+    $('sStreak').textContent = fa(store.get('dayStreak', 0));
+    $('sPlays').textContent = fa(store.get('plays', 0));
+  }
+
+  function countUp(el, target, ms) {
+    const t0 = performance.now();
+    const step = now => {
+      const k = Math.min(1, (now - t0) / ms);
+      const v = Math.round(target * (1 - Math.pow(1 - k, 3)) / 1000) * 1000;
+      el.innerHTML = toman(k === 1 ? target : v) + '<small>تومان</small>';
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  let toastT;
+  function toast(html) {
+    const el = $('toast');
+    el.innerHTML = html; el.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  function confetti(n) {
+    const app = $('app');
+    const colors = ['#ef394e', '#f9a825', '#00a049', '#2979ff', '#23254e'];
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + '%';
+      c.style.background = colors[i % colors.length];
+      c.style.animationDuration = 1.6 + Math.random() * 1.6 + 's';
+      c.style.animationDelay = Math.random() * .4 + 's';
+      app.appendChild(c);
+      setTimeout(() => c.remove(), 3800);
+    }
+  }
+
+  function modal(title, text) {
+    $('mTitle').textContent = title; $('mText').textContent = text;
+    $('modal').classList.add('show');
+  }
+  $('mOk').onclick = () => $('modal').classList.remove('show');
+
+  // ---------- wiring ----------
+  $('btnStart').onclick = startGame;
+  $('btnAgain').onclick = startGame;
+  $('btnHome').onclick = () => show('scrStart');
+  $('btnMore').onclick = () => answer('more');
+  $('btnLess').onclick = () => answer('less');
+  $('toolPoll').onclick = () => useTool('poll');
+  $('toolAnswer').onclick = () => useTool('answer');
+  $('btnShare').onclick = async () => {
+    const text = `من در «قیمت‌شناس» دیجی‌کالا ${fa(S.streak)} پاسخ درست پشت‌سرهم دادم${S.title ? ' و عنوان «' + S.title + '» گرفتم' : ''}! 🔥 تو چندتا میاری؟`;
+    try {
+      if (navigator.share) await navigator.share({ text });
+      else { await navigator.clipboard.writeText(text); toast('متن نتیجه کپی شد ✔'); }
+    } catch { modal('اشتراک‌گذاری', text); }
+  };
+  document.addEventListener('keydown', e => {
+    if (!S) return;
+    if (e.key === ' ' || e.key === 'Enter') { if (S.phase === 'locked' && $('scrGame').classList.contains('active')) reveal(); }
+    if (e.key === 'ArrowUp') answer('more');
+    if (e.key === 'ArrowDown') answer('less');
+  });
+
+  saveCoins();
+  renderStart();
+  if (!POOL.length) modal('داده‌ای پیدا نشد', 'فایل products.js بارگذاری نشد. ابتدا node fetch-products.js را اجرا کنید.');
+})();
+</script>
+</body>
+</html>

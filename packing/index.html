@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>مرکز بسته‌بندی دیجی‌کالا</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #ef394e; --green: #00a049; --amber: #f9a825; --gold: #f2b01e; --blue: #2979ff;
+    --bg: #f1f2f4; --text: #23254e; --muted: #81858b; --line: #e0e0e2;
+    --box: #c98d4f; --box-dark: #9c6431; --box-in: #7a4a22;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: Vazirmatn, Tahoma, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; user-select: none; -webkit-user-select: none; }
+  button { font-family: inherit; cursor: pointer; border: 0; color: inherit; }
+  img { -webkit-user-drag: none; }
+  .app { width: 100%; max-width: 430px; min-height: 100%; display: flex; flex-direction: column; padding: 10px 16px 14px; position: relative; overflow: hidden; }
+  .screen { display: none; flex-direction: column; flex: 1; min-height: 0; }
+  .screen.active { display: flex; }
+  .screen > * { flex-shrink: 0; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .logo { font-weight: 900; color: var(--red); font-size: 20px; }
+  .logo small { color: var(--text); font-weight: 600; font-size: 13px; margin-right: 6px; }
+  .coins { display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 99px; padding: 5px 12px 5px 8px; font-weight: 800; font-size: 14px; }
+  .coin-ico { width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe082, #f9a825 60%, #e08e00); display: inline-grid; place-items: center; color: #7a4d00; font-size: 11px; font-weight: 900; flex-shrink: 0; }
+  .coin-ico.sm { width: 15px; height: 15px; font-size: 8px; }
+
+  /* ---------- start ---------- */
+  .hero { background: linear-gradient(160deg, #b7672a, #ef394e); color: #fff; border-radius: 24px; padding: 20px; position: relative; overflow: hidden; }
+  .hero::after { content: "📦"; position: absolute; left: -8px; bottom: -22px; font-size: 110px; opacity: .22; }
+  .hero h1 { margin: 0 0 6px; font-size: 28px; font-weight: 900; }
+  .hero p { margin: 0; line-height: 1.9; font-size: 13px; }
+  .chips { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .chip { background: rgba(255,255,255,.2); border-radius: 99px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+  .panel { background: #fff; border-radius: 18px; padding: 12px 14px; margin-top: 10px; }
+  .panel h3 { margin: 0 0 8px; font-size: 14px; }
+  .today-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; border-top: 1px solid #f0f0f1; }
+  .today-row:first-of-type { border-top: 0; }
+  .today-row b { font-size: 13px; }
+  .dots { display: inline-flex; gap: 5px; direction: ltr; }
+  .dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--red); }
+  .dots i.used { background: #dcdde1; }
+  .gold-txt { color: #b57f00; font-weight: 800; }
+  .titles-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .tb { background: var(--bg); border-radius: 12px; padding: 8px 2px; text-align: center; font-size: 10px; color: var(--muted); }
+  .tb b { display: block; font-size: 16px; color: var(--text); }
+  .tb.got { background: #fff7e0; color: #8a5a00; box-shadow: inset 0 0 0 1.5px var(--amber); }
+  .steps { margin: 0; padding-right: 18px; font-size: 12px; line-height: 2; color: #3f4064; }
+  .spacer { flex: 1; min-height: 10px; }
+  .btn-primary { background: var(--red); color: #fff; font-size: 17px; font-weight: 800; border-radius: 14px; padding: 14px; width: 100%; box-shadow: 0 6px 16px rgba(239,57,78,.35); }
+  .btn-primary:disabled { background: #c9cbd1; box-shadow: none; cursor: default; }
+  .btn-primary:active:not(:disabled) { transform: scale(.97); }
+  .btn-ghost { background: #fff; font-weight: 700; border-radius: 14px; padding: 12px; width: 100%; font-size: 14px; }
+
+  /* ---------- game ---------- */
+  .hud { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .hud .box { background: #fff; border-radius: 12px; padding: 5px 10px; font-size: 11px; color: var(--muted); text-align: center; line-height: 1.3; }
+  .hud .box b { display: block; font-size: 16px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .hearts { font-size: 17px; letter-spacing: 1px; background: #fff; border-radius: 12px; padding: 6px 8px; direction: ltr; }
+  .hearts.hit { animation: shake .45s; }
+  .hud .title { flex: 1; min-width: 0; font-size: 11px; color: var(--muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .hud .title b { color: var(--text); }
+  .btn-pause { background: #fff; border-radius: 12px; width: 36px; height: 36px; font-size: 15px; flex-shrink: 0; }
+
+  #play { position: relative; display: flex; flex-direction: column; touch-action: none; }
+  #play.flash::after { content: ""; position: absolute; inset: -6px; border-radius: 16px; box-shadow: inset 0 0 0 4px var(--red); pointer-events: none; animation: fadeout .6s forwards; }
+  @keyframes fadeout { to { opacity: 0; } }
+  .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .slots.four { grid-template-columns: repeat(4, 1fr); }
+  .slot { display: flex; flex-direction: column; min-width: 0; position: relative; border-radius: 14px; }
+  .slot.hide { display: none; }
+  .slot.hover .carton { filter: brightness(1.12); }
+  .slot.hover .card { box-shadow: 0 0 0 2px var(--blue); }
+
+  .card { background: #fff; border-radius: 12px; padding: 6px; min-height: 104px; flex: 1; display: flex; flex-direction: column; gap: 4px; transition: box-shadow .15s; position: relative; }
+  .c-head { display: flex; justify-content: space-between; align-items: center; font-size: 10px; gap: 2px; }
+  .c-head .no { font-weight: 800; color: var(--muted); direction: ltr; }
+  .badge { font-size: 9.5px; font-weight: 800; border-radius: 99px; padding: 1px 6px; white-space: nowrap; }
+  .t-express .badge { background: #ffe3e6; color: var(--red); }
+  .t-golden .badge { background: #fff1c7; color: #9a6a00; }
+  .t-return .badge { background: #e3edff; color: var(--blue); }
+  .t-normal .badge { background: #eef0f3; color: var(--muted); }
+  .t-express .card { box-shadow: 0 0 0 2px var(--red); animation: warn 1s infinite; }
+  @keyframes warn { 50% { box-shadow: 0 0 0 2px rgba(239,57,78,.25); } }
+  .t-golden .card { background: linear-gradient(160deg, #fff8dc, #ffe9a8); box-shadow: 0 0 0 2px var(--gold); }
+  .lines { display: flex; flex-direction: column; gap: 3px; }
+  .line { display: flex; align-items: center; gap: 4px; background: #f6f6f8; border-radius: 8px; padding: 2px 3px; font-size: 11px; font-weight: 800; }
+  .line img { width: 26px; height: 26px; object-fit: contain; background: #fff; border-radius: 6px; flex-shrink: 0; }
+  .line .cnt { flex: 1; direction: ltr; text-align: right; }
+  .line .tick { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #cfd1d6; display: grid; place-items: center; font-size: 10px; color: transparent; flex-shrink: 0; }
+  .line.done { background: #e4f6ec; }
+  .line.done .tick { background: var(--green); border-color: var(--green); color: #fff; }
+  .line.done .tick.pop { animation: pop .35s; }
+  @keyframes pop { 50% { transform: scale(1.5); } }
+  .status { font-size: 10px; color: var(--muted); margin-top: auto; text-align: center; }
+  .tbar { height: 6px; border-radius: 99px; background: #fde0e3; overflow: hidden; margin-top: auto; }
+  .tbar div { height: 100%; background: var(--red); transform-origin: right; }
+  .tsec { font-size: 11px; font-weight: 900; color: var(--red); text-align: center; }
+  .wait { margin: auto; font-size: 11px; color: #b3b5ba; text-align: center; }
+
+  /* carton, seen from above: two flaps hinged at top/bottom edges */
+  .carton { position: relative; height: 86px; margin-top: 6px; perspective: 260px; }
+  .carton .bx { position: absolute; inset: 0; border-radius: 6px; background: var(--box-in); box-shadow: inset 0 0 0 5px var(--box), 0 3px 0 var(--box-dark); }
+  .inside { position: absolute; inset: 8px; display: flex; flex-wrap: wrap; gap: 3px; align-content: center; justify-content: center; }
+  .inside img, .ritem { width: 28px; height: 28px; border-radius: 6px; background: #fff; object-fit: contain; }
+  .ritem { position: relative; cursor: grab; touch-action: none; }
+  .ritem img { width: 100%; height: 100%; object-fit: contain; border-radius: 6px; }
+  .ritem.marked { box-shadow: 0 0 0 2px var(--blue); }
+  .ritem.marked::after { content: "↩"; position: absolute; top: -7px; left: -7px; width: 15px; height: 15px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 10px; display: grid; place-items: center; font-weight: 900; }
+  .flap { position: absolute; left: 0; right: 0; height: 50%; background: linear-gradient(var(--box), #d49a5c); transition: transform .35s ease-in; backface-visibility: hidden; }
+  .flap.t { top: 0; transform-origin: top; border-radius: 6px 6px 0 0; }
+  .flap.b { bottom: 0; transform-origin: bottom; border-radius: 0 0 6px 6px; background: linear-gradient(#d49a5c, var(--box)); }
+  .slot:not(.closed) .flap.t { transform: rotateX(-172deg); }
+  .slot:not(.closed) .flap.b { transform: rotateX(172deg); }
+  .tape { position: absolute; top: 50%; height: 18px; margin-top: -9px; background: repeating-linear-gradient(90deg, var(--red) 0 34px, #d92c41 34px 36px); color: #fff; font-size: 9px; font-weight: 900; overflow: hidden; white-space: nowrap; display: none; line-height: 18px; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .tape.on { display: block; }
+  .action { position: absolute; inset: 0; display: grid; place-items: center; }
+  .act-btn { background: var(--red); color: #fff; font-weight: 900; font-size: 11px; line-height: 1.5; border-radius: 14px; padding: 6px 8px; max-width: calc(100% - 6px); box-shadow: 0 4px 10px rgba(239,57,78,.4); animation: bounce 1s infinite; }
+  .act-btn.blue { background: var(--blue); box-shadow: 0 4px 10px rgba(41,121,255,.4); }
+  @keyframes bounce { 50% { transform: translateY(-3px); } }
+  .guide { color: #fff; font-weight: 900; font-size: 12px; background: rgba(0,0,0,.35); border-radius: 99px; padding: 3px 10px; pointer-events: none; animation: slide 1.2s infinite; }
+  @keyframes slide { 0% { transform: translateX(20px); } 100% { transform: translateX(-20px); } }
+  .slot.arrive .carton { animation: arrive .45s; }
+  @keyframes arrive { from { transform: translateY(-20px) scale(.8); opacity: 0; } }
+  .slot.leaving .carton { transition: transform .55s ease-in, opacity .55s; transform: translateY(60px) scale(.8); opacity: 0; }
+  .slot.leaving.fail .carton { transform: translateY(0) scale(.6) rotate(-10deg); }
+  .slot.wrong .carton { animation: shake .4s; }
+  @keyframes shake { 25% { transform: translateX(5px); } 50% { transform: translateX(-5px); } 75% { transform: translateX(3px); } }
+  .pts { position: absolute; top: 40%; left: 50%; transform: translateX(-50%); font-weight: 900; font-size: 18px; color: var(--green); pointer-events: none; animation: up 1s forwards; z-index: 20; text-shadow: 0 1px 0 #fff; white-space: nowrap; }
+  .pts.gold { color: #c78c00; font-size: 22px; }
+  @keyframes up { to { transform: translate(-50%, -50px); opacity: 0; } }
+
+  .hint { text-align: center; font-size: 11.5px; color: var(--muted); min-height: 36px; display: grid; place-items: center; line-height: 1.6; padding: 4px 0; }
+  .hint b { color: var(--text); }
+  .belt { position: relative; height: 84px; border-radius: 14px; background-color: #4a4d63; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 22px, transparent 22px 44px); box-shadow: inset 0 6px 0 #35374a, inset 0 -6px 0 #35374a; }
+  .belt::before, .belt::after { content: ""; position: absolute; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: #9da0b5; }
+  .belt::before { right: 6px; } .belt::after { left: 6px; }
+  .belt-end { position: absolute; left: 0; top: 0; bottom: 0; width: 34px; border-radius: 14px 0 0 14px; background: linear-gradient(90deg, rgba(239,57,78,.55), transparent); pointer-events: none; }
+  .bitem { position: absolute; left: 0; top: 0; width: 54px; height: 54px; border-radius: 12px; background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,.3); cursor: grab; touch-action: none; z-index: 5; will-change: transform; }
+  .bitem.in { animation: fadein .3s; }
+  @keyframes fadein { from { opacity: 0; } }
+  .bitem img { width: 100%; height: 100%; object-fit: contain; border-radius: 12px; pointer-events: none; }
+  .bitem.dragging { z-index: 30; cursor: grabbing; box-shadow: 0 10px 22px rgba(0,0,0,.35); scale: 1.12; }
+  .bitem.sel { box-shadow: 0 0 0 3px var(--blue), 0 3px 8px rgba(0,0,0,.3); }
+  .bitem.ghost { pointer-events: none; }
+
+  .boosters { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 8px; }
+  .bst { background: #fff; border-radius: 12px; padding: 5px 2px; font-size: 9.5px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.35; text-align: center; position: relative; }
+  .bst .ico { font-size: 17px; }
+  .bst .cost { display: flex; align-items: center; gap: 2px; font-weight: 900; font-size: 10px; }
+  .bst:disabled { opacity: .45; cursor: default; }
+  .bst.active { box-shadow: inset 0 0 0 2px var(--green); opacity: 1; }
+  .bst .left { position: absolute; top: -6px; left: -2px; background: var(--green); color: #fff; font-size: 9px; border-radius: 99px; padding: 0 5px; }
+
+  .toast { position: absolute; top: 58px; left: 50%; transform: translate(-50%, -20px); background: var(--text); color: #fff; padding: 9px 16px; border-radius: 14px; font-weight: 800; font-size: 13px; opacity: 0; pointer-events: none; transition: all .3s; z-index: 80; text-align: center; max-width: 92%; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.bad { background: var(--red); }
+  .toast .big { display: block; font-size: 20px; color: #ffd54f; }
+
+  .modal-bg { position: absolute; inset: 0; background: rgba(20,20,40,.55); display: none; align-items: flex-end; z-index: 90; }
+  .modal-bg.show { display: flex; }
+  .modal { background: #fff; width: 100%; border-radius: 24px 24px 0 0; padding: 22px 18px; text-align: center; }
+  .modal h3 { margin: 0 0 6px; font-size: 20px; }
+  .modal p { color: var(--muted); font-size: 13px; line-height: 1.9; margin: 0 0 14px; }
+  .modal .btns { display: flex; flex-direction: column; gap: 8px; }
+
+  /* ---------- end ---------- */
+  .end-head { text-align: center; padding: 4px 0 2px; }
+  .end-head h2 { margin: 0; font-size: 22px; font-weight: 900; }
+  .end-head .score { font-size: 40px; font-weight: 900; color: var(--red); line-height: 1.3; }
+  .end-head p { margin: 0; color: var(--muted); font-size: 12px; }
+  .grid-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 10px; }
+  .stat { background: #fff; border-radius: 12px; padding: 8px; }
+  .stat .k { font-size: 10px; color: var(--muted); }
+  .stat .v { font-size: 15px; font-weight: 900; margin-top: 1px; }
+  .breakdown { font-size: 12px; }
+  .breakdown div { display: flex; justify-content: space-between; padding: 3px 0; border-top: 1px dashed #eee; }
+  .breakdown div:first-child { border-top: 0; }
+  .breakdown .neg { color: var(--red); }
+  .breakdown .tot { font-weight: 900; font-size: 13px; border-top: 1.5px solid #ddd; }
+  .lb-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 5px 6px; border-radius: 8px; }
+  .lb-row .r { width: 22px; font-weight: 900; color: var(--muted); }
+  .lb-row .n { flex: 1; }
+  .lb-row .s { font-weight: 800; }
+  .lb-row.me { background: #fff1f3; color: var(--red); font-weight: 900; }
+  .lb-gap { text-align: center; color: #ccc; font-size: 12px; line-height: 1; }
+  .end-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .end-actions .btn-primary { grid-column: span 2; }
+
+  .confetti { position: absolute; top: -10px; width: 8px; height: 14px; z-index: 95; pointer-events: none; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="topbar">
+    <a class="logo" href="../" style="text-decoration:none" title="بازگشت به همه‌ی بازی‌ها">‹ دیجی‌کالا<small>مرکز بسته‌بندی</small></a>
+    <div class="coins"><span class="coin-ico">D</span><span id="coinCount">۰</span></div>
+  </div>
+
+  <!-- START: شروع شیفت -->
+  <section class="screen active" id="scrStart">
+    <div class="hero">
+      <h1>مرکز بسته‌بندی</h1>
+      <p>تو مسئول بسته‌بندی سفارش‌های دیجی‌کالایی! کالاها روی نوار نقاله می‌آیند؛ بردارشان و داخل کارتن سفارش درست بگذار. هرچه جلوتر بروی، نوار تندتر و سفارش‌ها پیچیده‌تر می‌شوند.</p>
+      <div class="chips"><span class="chip">⚡ سرعتی</span><span class="chip">🧠 مدیریتی</span><span class="chip">❤️ سه جان در هر دست</span><span class="chip">🗓 سه فرصت در روز</span></div>
+    </div>
+    <div class="panel">
+      <h3>شیفت امروز</h3>
+      <div class="today-row"><span>فرصت‌های امروز</span><span id="sChances"></span></div>
+      <div class="today-row"><span>⭐ سفارش طلایی امروز</span><span id="sGolden"></span></div>
+      <div class="today-row"><span>امتیاز تجمعی امروز</span><b id="sCum"></b></div>
+      <div class="today-row"><span>بهترین رکورد</span><b id="sBest"></b></div>
+    </div>
+    <div class="panel">
+      <h3>عنوان‌ها (سفارش تکمیل‌شده در یک دست)</h3>
+      <div class="titles-row" id="sTitles"></div>
+    </div>
+    <div class="panel">
+      <h3>چطور بازی کنم؟</h3>
+      <ol class="steps">
+        <li>کالا را از روی نوار <b>بکش</b> و داخل کارتن سفارش درست رها کن (یا لمسش کن و بعد روی کارتن بزن).</li>
+        <li>وقتی همه‌ی کالاها تیک خوردند، درهای کارتن بسته می‌شوند؛ <b>«چسب بزن بره»</b> را بزن و چسب را روی کارتن بکش.</li>
+        <li>⚡ سفارش فوری ۱۰ ثانیه مهلت دارد. ↩ در مرجوعی، چسب را باز کن و فقط کالاهای علامت‌دار را به نوار برگردان.</li>
+        <li>جان از دست می‌رود اگر: زمان سفارش فوری تمام شود، کالای موردنیاز از انتهای نوار رد شود، کالا را در سفارش اشتباه رها کنی یا مرجوعی را اشتباه تخلیه کنی.</li>
+      </ol>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn-primary" id="btnStart">شروع شیفت</button>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="scrGame">
+    <div class="hud">
+      <div class="hearts" id="hLives"></div>
+      <div class="box"><b id="hScore">۰</b>امتیاز</div>
+      <div class="box"><b id="hDone">۰</b>سفارش</div>
+      <div class="title" id="hTitle"></div>
+      <button class="btn-pause" id="btnPause" aria-label="توقف">⏸</button>
+    </div>
+    <div id="play">
+      <div class="slots" id="slots"></div>
+      <div class="hint" id="hint"></div>
+      <div class="belt" id="belt"><div class="belt-end"></div></div>
+    </div>
+    <div class="boosters" id="boosters"></div>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- END: پایان شیفت -->
+  <section class="screen" id="scrEnd">
+    <div class="end-head">
+      <h2 id="eHead">پایان دست</h2>
+      <div class="score" id="eScore">۰</div>
+      <p id="eSub"></p>
+    </div>
+    <div class="grid-stats">
+      <div class="stat"><div class="k">سفارش تکمیل‌شده</div><div class="v" id="eDone"></div></div>
+      <div class="stat"><div class="k">زمان حضور</div><div class="v" id="eTime"></div></div>
+      <div class="stat"><div class="k">عنوان کسب‌شده</div><div class="v" id="eTitle"></div></div>
+      <div class="stat"><div class="k">امتیاز سفارش طلایی</div><div class="v" id="eGold"></div></div>
+      <div class="stat"><div class="k">دیجی‌کوین دریافتی</div><div class="v" id="eCoins"></div></div>
+      <div class="stat"><div class="k">امتیاز تجمعی امروز</div><div class="v" id="eCum"></div></div>
+      <div class="stat"><div class="k">بهترین رکورد</div><div class="v" id="eBest"></div></div>
+      <div class="stat"><div class="k">رتبه‌ی روزانه</div><div class="v" id="eRank"></div></div>
+      <div class="stat"><div class="k">استریک روزانه</div><div class="v" id="eStreak"></div></div>
+    </div>
+    <div class="panel">
+      <h3>امتیاز این دست</h3>
+      <div class="breakdown" id="eBreak"></div>
+    </div>
+    <div class="panel">
+      <h3>لیدربورد امروز (امتیاز تجمعی)</h3>
+      <div id="eLb"></div>
+    </div>
+    <div class="panel today-row" style="border:0"><span>فرصت‌های باقی‌مانده‌ی امروز</span><span id="eChances"></span></div>
+    <div class="spacer"></div>
+    <div class="end-actions">
+      <button class="btn-ghost" id="btnShare">اشتراک‌گذاری</button>
+      <button class="btn-ghost" id="btnHome">خانه</button>
+      <button class="btn-primary" id="btnNext">دست بعدی</button>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+  <div class="modal-bg" id="modal"><div class="modal">
+    <h3 id="mTitle"></h3><p id="mText"></p><div class="btns" id="mBtns"></div>
+  </div></div>
+</div>
+
+<script src="../wallet.js"></script>
+<script src="items.js"></script>
+<script>
+(() => {
+  // ---------------- config (numbers from the proposal where it gives them) ----------------
+  const LIVES = 3, MAX_LIVES = 5, CHANCES_PER_DAY = 3;
+  const EXPRESS_TIME = 10;                 // «ده ثانیه تا ارسال»
+  const GOLDEN_MULT = 3;                   // «سه برابر سفارش عادی»
+  const CONTINUE_COST = 10;                // «یک‌بار ادامه با ۱۰ دیجی‌کوین»
+  const BOOSTER_COST = 10;                 // «هر کدام ۱۰ دیجی‌کوین»
+  const BOOSTER_PENALTY = 75, LIFE_PENALTY = 50;
+  const TITLES = [
+    { at: 5, name: 'بسته‌بند خفن', coins: 3 },
+    { at: 10, name: 'گولاخ', coins: 5 },
+    { at: 20, name: 'افسانه‌ای', coins: 10 },
+  ];
+  const BOOSTERS = [
+    { id: 'life', ico: '❤️', name: 'یک جان بیشتر' },
+    { id: 'slow', ico: '🐢', name: 'کاهش سرعت نوار', dur: 30 },
+    { id: 'slot', ico: '➕', name: 'اسلات اضافه', dur: 45 },
+    { id: 'auto', ico: '🤖', name: 'بسته‌بندی خودکار' },
+    { id: 'double', ico: '✖️۲', name: 'امتیاز دوبرابر', dur: 30 },
+  ];
+  const ITEMS = window.ITEMS || [];
+  const ITEM_SIZE = 54;
+
+  // ---------------- helpers ----------------
+  const $ = id => document.getElementById(id);
+  const fa = n => Number(n).toLocaleString('fa-IR');
+  const faDigits = s => String(s).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  const clock = s => faDigits(`${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`);
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const randInt = (a, b) => Math.floor(rand(a, b + 1));
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const shuffle = arr => arr.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(p => p[1]);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('pk_' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem('pk_' + k, JSON.stringify(v)); } catch {} },
+  };
+  const localDate = (off = 0) => { const d = new Date(Date.now() + off * 864e5); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
+
+  let coins = Wallet.get();
+  const saveCoins = () => { Wallet.set(coins); $('coinCount').textContent = fa(coins); };
+
+  // Daily state: 3 chances, and one guaranteed golden order hidden in a random hand
+  function loadDay() {
+    let d = store.get('day', null);
+    if (!d || d.date !== localDate()) d = { date: localDate(), hands: 0, scores: [], goldenHand: randInt(0, CHANCES_PER_DAY - 1), goldenSpawned: false, goldenScore: 0 };
+    return d;
+  }
+  const saveDay = d => store.set('day', d);
+
+  // ---------------- game state ----------------
+  let G = null, rafId = null, lastTs = 0, day = loadDay();
+  const slotsEl = $('slots'), beltEl = $('belt'), playEl = $('play');
+
+  function newGame() {
+    const handIdx = day.hands;
+    day.hands++; saveDay(day);
+    const handsEver = store.get('handsEver', 0);
+    store.set('handsEver', handsEver + 1);
+    G = {
+      t: 0, lives: LIVES, score: 0, done: 0, combo: 0, livesLost: 0, boostersUsed: 0, continued: false,
+      paused: false, over: false, title: null, titleCoins: 0, goldenPts: 0,
+      bd: { base: 0, speed: 0, express: 0, golden: 0, combo: 0, double: 0 },
+      belt: [], sinceSpawn: 0, nextGap: 0, beltOffset: 0, priority: [], selected: null,
+      slowUntil: 0, doubleUntil: 0, slotUntil: 0,
+      // «مرجوعی و سفارش‌های پیچیده از اولین دست فعال نیستند»
+      advanced: handsEver > 0,
+      goldenPending: !day.goldenSpawned && handIdx >= day.goldenHand,
+      // carried over (or last chance): golden is the first order, so «روزی یک بار، تضمینی» holds
+      goldenAt: (handIdx > day.goldenHand || handIdx === CHANCES_PER_DAY - 1) ? 0 : rand(15, 50),
+      slots: [],
+    };
+    buildSlots();
+    buildBoosters();
+    show('scrGame');
+    renderHud();
+    lastTs = performance.now();
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(loop);
+  }
+
+  // ---------------- difficulty ----------------
+  const beltSpeed = () => (38 + Math.min(72, G.done * 3)) * (G.t < G.slowUntil ? 0.55 : 1);   // px/s
+  const spawnGap = () => Math.max(60, 124 - G.done * 3.2) + rand(0, 30);                        // px between items
+  const baseSlots = () => (G.done < 2 ? 2 : 3);                                                  // «سفارش‌های همزمان بیشتر»
+  const similarOn = () => G.done >= 8;                                                           // «کالاهای مشابه با رنگ یا مدل متفاوت»
+
+  // ---------------- slots ----------------
+  function buildSlots() {
+    slotsEl.innerHTML = '';
+    G.slots = [];
+    for (let i = 0; i < 4; i++) {
+      const el = document.createElement('div');
+      el.className = 'slot' + (i === 3 ? ' hide' : '');
+      el.innerHTML = `<div class="card"></div>
+        <div class="carton"><div class="bx"></div><div class="inside"></div>
+          <div class="flap t"></div><div class="flap b"></div>
+          <div class="tape">دیجی‌کالا · دیجی‌کالا · دیجی‌کالا</div><div class="action"></div></div>`;
+      slotsEl.appendChild(el);
+      const s = { i, el, card: el.querySelector('.card'), carton: el.querySelector('.carton'), inside: el.querySelector('.inside'),
+        tape: el.querySelector('.tape'), action: el.querySelector('.action'), state: 'empty', order: null, refillAt: 0.4 + i * 1.2 };
+      el.addEventListener('click', () => { if (G.selected && s.state === 'open') placeItem(G.selected, s); });
+      s.carton.addEventListener('pointerdown', e => tapeStart(e, s));
+      G.slots.push(s);
+      renderSlot(s);
+    }
+    slotsEl.classList.remove('four');
+  }
+  const visibleSlots = () => G.slots.filter(s => !s.el.classList.contains('hide'));
+  const activeOrders = () => G.slots.filter(s => s.order).length;
+
+  let orderSeq = 0;
+  function newOrder(s) {
+    const d = G.done;
+    let type = 'normal';
+    if (G.goldenPending && G.t >= G.goldenAt) type = 'golden';
+    else if (G.advanced && d >= 4 && !G.slots.some(x => x.order && x.order.type === 'return') && Math.random() < 0.2) type = 'return';
+    else if (d >= 3 && Math.random() < Math.min(0.35, 0.12 + d * 0.012)) type = 'express';   // «ورود ارسال سریع»
+
+    const o = { no: randInt(100000, 999999), seq: ++orderSeq, type, created: G.t, lines: [], deadline: null, contents: null };
+    if (type === 'return') {
+      const marked = d >= 10 ? 2 : 1;
+      const items = pickOrderItems(3);
+      o.contents = shuffle(items.map((item, k) => ({ item, marked: k < marked, out: false })));
+      o.lines = o.contents.filter(c => c.marked).map(c => ({ item: c.item, need: 1, have: 0 }));
+    } else {
+      let lineCount, maxNeed;
+      if (type === 'express') { lineCount = 1; maxNeed = d >= 12 ? 2 : 1; }
+      else if (type === 'golden') { lineCount = G.advanced ? randInt(2, 3) : 2; maxNeed = G.advanced ? 2 : 1; }
+      else if (!G.advanced) { lineCount = 1; maxNeed = d >= 6 ? 2 : 1; }
+      else { lineCount = d < 3 ? 1 : d < 10 ? randInt(1, 2) : randInt(2, 3); maxNeed = d < 5 ? 1 : d < 15 ? 2 : 3; }  // «کالای بیشتر در هر سفارش»
+      o.lines = pickOrderItems(lineCount).map(item => ({ item, need: randInt(1, maxNeed), have: 0 }));
+      if (type === 'express') {
+        o.deadline = G.t + EXPRESS_TIME;
+        o.lines.forEach(l => { for (let k = 0; k < l.need; k++) G.priority.push(l.item); });
+      }
+      if (type === 'golden') {
+        G.goldenPending = false; day.goldenSpawned = true; saveDay(day);
+        toast('⭐ سفارش طلایی امروز رسید! امتیاز ×۳');
+      }
+    }
+    s.order = o;
+    s.state = type === 'return' ? 'rclosed' : 'open';
+    s.el.classList.remove('leaving', 'fail');
+    s.el.classList.add('arrive');
+    setTimeout(() => s.el.classList.remove('arrive'), 460);
+    renderSlot(s);
+  }
+
+  // Distinct items for a new order; early on avoid items that look like anything already requested
+  function pickOrderItems(k) {
+    const busy = new Set(), busyGroups = new Set();
+    G.slots.forEach(s => s.order && s.order.lines.forEach(l => { busy.add(l.item.id); busyGroups.add(l.item.name); }));
+    let pool = ITEMS.filter(it => !busy.has(it.id) && (similarOn() || !busyGroups.has(it.name)));
+    if (pool.length < k) pool = ITEMS.filter(it => !busy.has(it.id));
+    const out = [], groups = new Set();
+    for (const it of shuffle(pool)) {
+      if (out.length === k) break;
+      if (groups.has(it.name)) continue;
+      out.push(it); groups.add(it.name);
+    }
+    return out;
+  }
+
+  function renderSlot(s) {
+    const o = s.order;
+    const closed = ['closed', 'taping', 'taped', 'rclosed', 'rdone'].includes(s.state);
+    s.el.classList.toggle('closed', closed);
+    ['t-normal', 't-express', 't-golden', 't-return'].forEach(c => s.el.classList.remove(c));
+    if (o) s.el.classList.add('t-' + o.type);
+    s.tape.classList.toggle('on', ['taping', 'taped', 'rclosed'].includes(s.state));
+    if (s.state !== 'taping') { s.tape.style.left = '0'; s.tape.style.width = '100%'; }
+    if (!o) {
+      s.card.innerHTML = `<div class="wait">${s.i === 2 && G.done < 2 ? '🔒 بعد از ۲ سفارش باز می‌شود' : 'در انتظار سفارش…'}</div>`;
+      s.inside.innerHTML = ''; s.action.innerHTML = '';
+      return;
+    }
+    const badge = { normal: 'عادی', express: '⚡ فوری', golden: '⭐ طلایی ×۳', return: '↩ مرجوعی' }[o.type];
+    const doneLines = o.lines.filter(l => l.have >= l.need).length;
+    s.card.innerHTML = `
+      <div class="c-head"><span class="no">#${faDigits(o.no)}</span><span class="badge">${badge}</span></div>
+      <div class="lines">${o.lines.map(l => `
+        <div class="line ${l.have >= l.need ? 'done' : ''}" title="${l.item.name}">
+          <img src="${l.item.img}" alt="${l.item.name}"><span class="cnt">${fa(l.have)}/${fa(l.need)}</span><span class="tick">✓</span>
+        </div>`).join('')}</div>
+      ${o.type === 'express' ? '<div class="tbar"><div></div></div><div class="tsec"></div>' : `<div class="status">${o.type === 'return' ? 'برگشت' : 'تکمیل'}: ${fa(doneLines)} از ${fa(o.lines.length)}</div>`}`;
+    s.timerBar = s.card.querySelector('.tbar div');
+    s.timerSec = s.card.querySelector('.tsec');
+
+    // what is physically inside the carton
+    if (o.type === 'return') {
+      s.inside.innerHTML = '';
+      if (s.state === 'ropen') {
+        o.contents.filter(c => !c.out).forEach(c => {
+          const r = document.createElement('div');
+          r.className = 'ritem' + (c.marked ? ' marked' : '');
+          r.innerHTML = `<img src="${c.item.img}" alt="">`;
+          r.addEventListener('pointerdown', e => startDrag(e, { kind: 'carton', slot: s, entry: c, el: r }));
+          s.inside.appendChild(r);
+        });
+      }
+    } else {
+      s.inside.innerHTML = o.lines.flatMap(l => Array(l.have).fill(`<img src="${l.item.img}" alt="">`)).join('');
+    }
+    s.action.innerHTML = s.state === 'closed' ? '<button class="act-btn">چسب بزن بره 📦</button>'
+      : s.state === 'taping' ? '<span class="guide">⟵ چسب را بکش ⟶</span>'
+      : s.state === 'rclosed' ? '<button class="act-btn blue">✂️ باز کن</button>' : '';
+    const btn = s.action.querySelector('button');
+    if (btn) btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (G.paused) return;
+      if (s.state === 'closed') { s.state = 'taping'; renderSlot(s); }
+      else if (s.state === 'rclosed') { s.state = 'ropen'; renderSlot(s); }
+    });
+  }
+
+  function popTick(s, lineIdx) {
+    const t = s.card.querySelectorAll('.line .tick')[lineIdx];
+    if (t) t.classList.add('pop');
+  }
+
+  // ---------------- belt ----------------
+  function spawnBelt(item, x) {
+    const el = document.createElement('div');
+    el.className = 'bitem in';
+    el.innerHTML = `<img src="${item.img}" alt="${item.name}">`;
+    const obj = { item, x: x ?? beltEl.clientWidth - ITEM_SIZE + 6, yOff: rand(-5, 5), el, drag: false };
+    el.addEventListener('pointerdown', e => startDrag(e, { kind: 'belt', obj, el }));
+    playEl.appendChild(el);
+    G.belt.push(obj);
+    positionBeltItem(obj);
+    return obj;
+  }
+  function removeBeltItem(obj) {
+    obj.el.remove();
+    G.belt = G.belt.filter(b => b !== obj);
+    if (G.selected === obj) G.selected = null;
+  }
+  function positionBeltItem(obj) {
+    const top = beltEl.offsetTop + (beltEl.offsetHeight - ITEM_SIZE) / 2 + obj.yOff;
+    obj.el.style.transform = `translate(${beltEl.offsetLeft + obj.x}px, ${top}px)`;
+  }
+  // remaining units open orders still need, per item id
+  function remainingNeed(id) {
+    let n = 0;
+    G.slots.forEach(s => {
+      if (s.order && s.order.type !== 'return' && s.state === 'open')
+        s.order.lines.forEach(l => { if (l.item.id === id) n += l.need - l.have; });
+    });
+    return n;
+  }
+  function onBeltCount(id, except) { return G.belt.filter(b => b.item.id === id && b !== except).length; }
+
+  function pickSpawnItem() {
+    while (G.priority.length) {
+      const it = G.priority.shift();
+      if (remainingNeed(it.id) > onBeltCount(it.id)) return it;
+    }
+    const needs = [];
+    G.slots.forEach(s => {
+      if (!s.order || s.order.type === 'return' || s.state !== 'open') return;
+      s.order.lines.forEach(l => {
+        const missing = remainingNeed(l.item.id) - onBeltCount(l.item.id);
+        if (missing > 0) needs.push({ item: l.item, w: missing * (s.order.type === 'express' ? 3 : 1) });
+      });
+    });
+    if (needs.length && Math.random() < 0.62) {
+      let r = Math.random() * needs.reduce((a, n) => a + n.w, 0);
+      for (const n of needs) { if ((r -= n.w) <= 0) return n.item; }
+      return needs[0].item;
+    }
+    // distractor: not needed by anyone; later often a look-alike from the same category
+    const neededIds = new Set(), neededGroups = new Set();
+    G.slots.forEach(s => s.order && s.order.lines.forEach(l => { neededIds.add(l.item.id); neededGroups.add(l.item.name); }));
+    const free = ITEMS.filter(it => !neededIds.has(it.id));
+    const similar = free.filter(it => neededGroups.has(it.name));
+    return (similarOn() && similar.length && Math.random() < 0.5) ? pick(similar) : pick(free.length ? free : ITEMS);
+  }
+
+  // ---------------- main loop ----------------
+  function loop(ts) {
+    const dt = Math.min(0.05, (ts - lastTs) / 1000);
+    lastTs = ts;
+    if (!G.paused && !G.over) step(dt);
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function step(dt) {
+    G.t += dt;
+    const v = beltSpeed();
+    G.beltOffset += v * dt;
+    beltEl.style.backgroundPositionX = -G.beltOffset + 'px';
+
+    // move & expire items (right → left)
+    for (const obj of [...G.belt]) {
+      if (obj.drag) continue;
+      obj.x -= v * dt;
+      if (obj.x < -ITEM_SIZE) {
+        removeBeltItem(obj);
+        // «کالای ازدست‌رفته فقط وقتی جان کم می‌کند که یکی از سفارش‌های باز به آن نیاز داشته باشد»
+        if (remainingNeed(obj.item.id) > onBeltCount(obj.item.id)) loseLife('یک کالای موردنیاز از انتهای نوار رد شد!');
+        if (G.over || G.paused) return;
+        continue;
+      }
+      positionBeltItem(obj);
+    }
+
+    G.sinceSpawn += v * dt;
+    if (G.sinceSpawn >= G.nextGap && activeOrders() > 0) {
+      spawnBelt(pickSpawnItem());
+      G.sinceSpawn = 0; G.nextGap = spawnGap();
+    }
+
+    // extra slot lifecycle
+    const four = G.slots[3];
+    if (G.t < G.slotUntil) { four.el.classList.remove('hide'); slotsEl.classList.add('four'); }
+    else if (!four.order && !four.el.classList.contains('hide')) { four.el.classList.add('hide'); slotsEl.classList.remove('four'); }
+
+    for (const s of visibleSlots()) {
+      // each slot refills itself: «سفارش جدید در همان اسلات»
+      if (s.state === 'empty' && G.t >= s.refillAt) {
+        const usable = s.i === 3 ? G.t < G.slotUntil : s.i < baseSlots();
+        if (usable) newOrder(s);
+      }
+      const o = s.order;
+      if (o && o.type === 'express' && ['open', 'closed', 'taping'].includes(s.state)) {
+        const left = Math.max(0, o.deadline - G.t);
+        if (s.timerBar) s.timerBar.style.transform = `scaleX(${left / EXPRESS_TIME})`;
+        if (s.timerSec) s.timerSec.textContent = fa(Math.ceil(left)) + ' ثانیه';
+        if (left <= 0) {
+          failOrder(s);
+          loseLife('زمان سفارش فوری تمام شد!');
+          if (G.over || G.paused) return;
+        }
+      }
+    }
+    updateHint();
+    updateBoosters();
+    renderHud();
+  }
+
+  // ---------------- drag & drop / tap ----------------
+  let D = null;
+  const playPoint = e => { const r = playEl.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  function slotAt(e) {
+    for (const s of visibleSlots()) {
+      const r = s.el.getBoundingClientRect();
+      if (e.clientX >= r.left - 4 && e.clientX <= r.right + 4 && e.clientY >= r.top - 4 && e.clientY <= r.bottom + 10) return s;
+    }
+    return null;
+  }
+  function overBelt(e) { const r = beltEl.getBoundingClientRect(); return e.clientY >= r.top - 24 && e.clientY <= r.bottom + 24; }
+
+  function startDrag(e, src) {
+    if (!G || G.paused || G.over || D) return;
+    e.preventDefault(); e.stopPropagation();
+    if (src.kind === 'carton' && G.slots.indexOf(src.slot) < 0) return;
+    D = { src, x0: e.clientX, y0: e.clientY, moved: false, pid: e.pointerId, ghost: null };
+    if (src.kind === 'belt') { src.obj.drag = true; }
+    window.addEventListener('pointermove', dragMove);
+    window.addEventListener('pointerup', dragEnd);
+    window.addEventListener('pointercancel', dragEnd);
+  }
+  function dragMove(e) {
+    if (!D || e.pointerId !== D.pid) return;
+    if (!D.moved && Math.hypot(e.clientX - D.x0, e.clientY - D.y0) > 8) {
+      D.moved = true;
+      if (D.src.kind === 'belt') { D.src.el.classList.add('dragging'); D.src.el.classList.remove('sel'); if (G.selected === D.src.obj) G.selected = null; }
+      else {
+        D.ghost = document.createElement('div');
+        D.ghost.className = 'bitem dragging ghost';
+        D.ghost.innerHTML = `<img src="${D.src.entry.item.img}" alt="">`;
+        playEl.appendChild(D.ghost);
+        D.src.el.style.opacity = '.3';
+      }
+    }
+    if (!D.moved) return;
+    const p = playPoint(e);
+    const el = D.src.kind === 'belt' ? D.src.el : D.ghost;
+    el.style.transform = `translate(${p.x - ITEM_SIZE / 2}px, ${p.y - ITEM_SIZE / 2}px)`;
+    G.slots.forEach(s => s.el.classList.remove('hover'));
+    const s = D.src.kind === 'belt' && slotAt(e);
+    if (s) s.el.classList.add('hover');
+  }
+  function dragEnd(e) {
+    if (!D || e.pointerId !== D.pid) return;
+    window.removeEventListener('pointermove', dragMove);
+    window.removeEventListener('pointerup', dragEnd);
+    window.removeEventListener('pointercancel', dragEnd);
+    G.slots.forEach(s => s.el.classList.remove('hover'));
+    const { src, moved, ghost } = D;
+    D = null;
+    if (G.paused || G.over) { if (src.kind === 'belt') { src.obj.drag = false; src.el.classList.remove('dragging'); } if (ghost) ghost.remove(); return; }
+
+    if (src.kind === 'belt') {
+      const obj = src.obj;
+      obj.drag = false;
+      obj.el.classList.remove('dragging');
+      if (!moved) { select(obj); return; }                         // tap = select, then tap a carton
+      const s = e.type === 'pointerup' && slotAt(e);
+      if (s) { placeItem(obj, s); return; }
+      // released elsewhere → back onto the belt where the finger is
+      const p = playPoint(e);
+      obj.x = Math.max(0, Math.min(beltEl.clientWidth - ITEM_SIZE, p.x - beltEl.offsetLeft - ITEM_SIZE / 2));
+      positionBeltItem(obj);
+    } else {
+      if (ghost) ghost.remove();
+      src.el.style.opacity = '';
+      if (!moved) returnOut(src.slot, src.entry);                  // tap = send back to belt
+      else if (e.type === 'pointerup' && overBelt(e)) returnOut(src.slot, src.entry, playPoint(e).x - beltEl.offsetLeft - ITEM_SIZE / 2);
+    }
+  }
+  function select(obj) {
+    if (G.selected) G.selected.el.classList.remove('sel');
+    G.selected = G.selected === obj ? null : obj;
+    if (G.selected) obj.el.classList.add('sel');
+  }
+
+  // «جریمه‌ی کالای اشتباه هم فقط بعد از رهاکردن قطعی داخل کارتن اعمال می‌شود»
+  function placeItem(obj, s) {
+    if (G.paused || G.over) return;
+    if (s.state !== 'open') {
+      positionBeltItem(obj);
+      if (G.selected === obj) select(obj);
+      toast(s.order ? 'این کارتن الان کالا قبول نمی‌کند' : 'این اسلات هنوز سفارش ندارد');
+      return;
+    }
+    const o = s.order;
+    const idx = o.lines.findIndex(l => l.item.id === obj.item.id && l.have < l.need);
+    if (idx < 0) {
+      // rejected item goes back onto the belt under this carton
+      const r = s.el.getBoundingClientRect(), pr = playEl.getBoundingClientRect();
+      obj.x = Math.max(0, r.left - pr.left + r.width / 2 - ITEM_SIZE / 2 - beltEl.offsetLeft);
+      if (G.selected === obj) select(obj);
+      positionBeltItem(obj);
+      s.el.classList.remove('wrong'); void s.el.offsetWidth; s.el.classList.add('wrong');
+      loseLife(`کالای اشتباه در سفارش #${faDigits(o.no)}!`);
+      return;
+    }
+    removeBeltItem(obj);
+    o.lines[idx].have++;
+    const complete = o.lines.every(l => l.have >= l.need);
+    if (complete) s.state = 'closed';                             // «بسته شدن درهای کارتن»
+    renderSlot(s);
+    if (o.lines[idx].have >= o.lines[idx].need) popTick(s, idx);
+  }
+
+  // ---------------- tape: «کشیدن چسب روی کارتن» ----------------
+  function tapeStart(e, s) {
+    if (!G || G.paused || G.over || s.state !== 'taping') return;
+    e.preventDefault(); e.stopPropagation();
+    const r = s.carton.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const T = { min: x, max: x, pid: e.pointerId };
+    const move = ev => {
+      if (ev.pointerId !== T.pid) return;
+      const cx = Math.max(0, Math.min(r.width, ev.clientX - r.left));
+      T.min = Math.min(T.min, cx); T.max = Math.max(T.max, cx);
+      s.tape.style.left = T.min + 'px'; s.tape.style.width = (T.max - T.min) + 'px';
+    };
+    const up = ev => {
+      if (ev.pointerId !== T.pid) return;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      if (s.state !== 'taping') return;
+      if (T.max - T.min >= r.width * 0.8) finishOrder(s);
+      else { s.tape.style.width = '0'; toast('چسب را از این سر تا آن سر کارتن بکش'); }
+    };
+    s.tape.classList.add('on');
+    s.tape.style.left = x + 'px'; s.tape.style.width = '0';
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  }
+
+  // ---------------- scoring ----------------
+  function award(s, parts) {
+    const o = s.order;
+    G.combo++;
+    parts.combo = (G.combo - 1) * 15;                                // «کمبوی بدون اشتباه»
+    const sub = parts.base + parts.speed + parts.express + parts.combo;
+    parts.golden = o.type === 'golden' ? sub * (GOLDEN_MULT - 1) : 0;
+    parts.double = G.t < G.doubleUntil ? sub + parts.golden : 0;
+    const total = sub + parts.golden + parts.double;
+    for (const k in parts) G.bd[k] += parts[k];
+    G.score += total;
+    if (o.type === 'golden') { G.goldenPts = total; day.goldenScore = total; saveDay(day); }
+    G.done++;
+    const pts = document.createElement('div');
+    pts.className = 'pts' + (o.type === 'golden' ? ' gold' : '');
+    pts.textContent = '+' + fa(total);
+    s.el.appendChild(pts);
+    setTimeout(() => pts.remove(), 1000);
+    const t = TITLES.find(t => t.at === G.done);
+    if (t) {
+      G.title = t.name; G.titleCoins += t.coins;
+      toast(`<span class="big">🏅 ${t.name}</span>${fa(t.at)} سفارش تکمیل شد`);
+      confetti(50);
+    } else if (G.done === 21) toast('از اینجا به بعد: شکستن رکورد! ∞');
+  }
+
+  function finishOrder(s, auto = false) {
+    const o = s.order;
+    const items = o.lines.reduce((a, l) => a + l.need, 0);
+    const secs = G.t - o.created;
+    s.state = 'taped';
+    renderSlot(s);
+    award(s, {
+      base: 50 + 25 * items,                                           // «امتیاز پایه‌ی هر سفارش»
+      speed: auto ? 0 : Math.max(0, Math.round((20 + 5 * items - secs) * 4)),   // «پاداش سرعت»
+      express: o.type === 'express' ? 100 : 0,                          // «پاداش سفارش سریع»
+    });
+    leave(s, 280);                                                     // «خروج خودکار کارتن»
+  }
+
+  function leave(s, delay, fail = false) {
+    const o = s.order;
+    setTimeout(() => {
+      if (!G || s.order !== o) return;
+      s.el.classList.add('leaving');
+      s.el.classList.toggle('fail', fail);
+      setTimeout(() => {
+        if (!G || s.order !== o) return;
+        s.order = null; s.state = 'empty'; s.refillAt = G.t + 1;       // «سفارش جدید در همان اسلات»
+        s.el.classList.remove('leaving', 'fail');
+        renderSlot(s);
+      }, 560);
+    }, delay);
+  }
+  function failOrder(s) { s.state = 'failed'; s.el.classList.add('closed'); s.action.innerHTML = ''; leave(s, 0, true); }
+
+  // ---------------- returns: «مکانیزم معکوس» ----------------
+  function returnOut(s, entry, x) {
+    if (s.state !== 'ropen' || entry.out || G.paused || G.over) return;
+    if (!entry.marked) {
+      s.el.classList.remove('wrong'); void s.el.offsetWidth; s.el.classList.add('wrong');
+      loseLife('این کالا جزو مرجوعی نیست!');
+      return;
+    }
+    entry.out = true;
+    const line = s.order.lines.find(l => l.item.id === entry.item.id);
+    line.have = 1;
+    if (x === undefined) {
+      const r = s.el.getBoundingClientRect(), pr = playEl.getBoundingClientRect();
+      x = r.left - pr.left + r.width / 2 - ITEM_SIZE / 2 - beltEl.offsetLeft;
+    }
+    spawnBelt(entry.item, Math.max(0, Math.min(beltEl.clientWidth - ITEM_SIZE, x)));
+    const lineIdx = s.order.lines.indexOf(line);
+    if (s.order.lines.every(l => l.have >= l.need)) {
+      s.state = 'rdone';
+      renderSlot(s);
+      const o = s.order;
+      award(s, { base: 60 + 20 * o.lines.length, speed: Math.max(0, Math.round((18 - (G.t - o.created)) * 4)), express: 0 });
+      leave(s, 350);
+    } else renderSlot(s);
+    popTick(s, lineIdx);
+  }
+
+  // ---------------- lives ----------------
+  function loseLife(reason) {
+    if (G.over || G.lives <= 0) return;
+    G.lives--; G.livesLost++; G.combo = 0;
+    const h = $('hLives'); h.classList.remove('hit'); void h.offsetWidth; h.classList.add('hit');
+    playEl.classList.remove('flash'); void playEl.offsetWidth; playEl.classList.add('flash');
+    toast('💔 ' + reason, true);
+    renderHud();
+    if (G.lives <= 0) outOfLives();
+  }
+  function outOfLives() {
+    G.paused = true;
+    const canContinue = !G.continued && coins >= CONTINUE_COST;
+    modal('جون‌هات تموم شد! 💔',
+      G.continued ? 'از ادامه‌ی این دست قبلاً استفاده کردی.' : `می‌توانی یک‌بار با ${fa(CONTINUE_COST)} دیجی‌کوین ادامه بدهی (+۱ جان) یا نتیجه را ثبت کنی.`,
+      [
+        ...(canContinue ? [{ text: `ادامه با ${fa(CONTINUE_COST)} دیجی‌کوین`, primary: true, fn: () => {
+          coins -= CONTINUE_COST; saveCoins(); G.continued = true; G.lives = 1; G.paused = false; renderHud();
+        } }] : []),
+        { text: 'ثبت نتیجه', primary: !canContinue, fn: endHand },
+      ]);
+  }
+
+  // ---------------- boosters ----------------
+  function buildBoosters() {
+    $('boosters').innerHTML = BOOSTERS.map(b => `
+      <button class="bst" data-id="${b.id}"><span class="ico">${b.ico}</span>${b.name}
+        <span class="cost">${fa(BOOSTER_COST)} <span class="coin-ico sm">D</span></span></button>`).join('');
+    $('boosters').querySelectorAll('.bst').forEach(btn => btn.addEventListener('click', () => useBooster(btn.dataset.id)));
+  }
+  function autoTarget() {
+    return visibleSlots().filter(s => s.state === 'open' && s.order.type !== 'return')
+      .sort((a, b) => (a.order.type === 'express' ? -1 : 0) - (b.order.type === 'express' ? -1 : 0))[0];
+  }
+  function boosterState(id) {
+    const until = { slow: G.slowUntil, slot: G.slotUntil, double: G.doubleUntil }[id];
+    const active = until !== undefined && G.t < until;
+    const usable = !active && (id !== 'life' || G.lives < MAX_LIVES) && (id !== 'auto' || !!autoTarget());
+    return { active, left: active ? Math.ceil(until - G.t) : 0, usable };
+  }
+  function updateBoosters() {
+    $('boosters').querySelectorAll('.bst').forEach(btn => {
+      const st = boosterState(btn.dataset.id);
+      btn.disabled = !st.usable || coins < BOOSTER_COST;
+      btn.classList.toggle('active', st.active);
+      let tag = btn.querySelector('.left');
+      if (st.active) { if (!tag) { tag = document.createElement('span'); tag.className = 'left'; btn.appendChild(tag); } tag.textContent = fa(st.left); }
+      else if (tag) tag.remove();
+    });
+  }
+  function useBooster(id) {
+    if (!G || G.paused || G.over) return;
+    if (!boosterState(id).usable || coins < BOOSTER_COST) return;
+    coins -= BOOSTER_COST; saveCoins(); G.boostersUsed++;
+    const b = BOOSTERS.find(b => b.id === id);
+    if (id === 'life') G.lives++;
+    if (id === 'slow') G.slowUntil = G.t + b.dur;
+    if (id === 'double') G.doubleUntil = G.t + b.dur;
+    if (id === 'slot') { G.slotUntil = G.t + b.dur; G.slots[3].refillAt = G.t + 0.3; }
+    if (id === 'auto') {
+      const s = autoTarget();
+      s.order.lines.forEach(l => l.have = l.need);
+      finishOrder(s, true);
+    }
+    toast(`${b.ico} ${b.name} فعال شد`);
+    renderHud(); updateBoosters();
+  }
+
+  // ---------------- HUD / hints ----------------
+  const penalties = () => G.boostersUsed * BOOSTER_PENALTY + G.livesLost * LIFE_PENALTY;
+  function renderHud() {
+    const lostShown = Math.max(0, LIVES - G.lives);
+    $('hLives').textContent = '❤️'.repeat(Math.max(0, G.lives)) + '🖤'.repeat(lostShown);
+    $('hScore').textContent = fa(Math.max(0, G.score - penalties()));
+    $('hDone').textContent = fa(G.done);
+    $('hTitle').innerHTML = `عنوان: <b>${G.title || '—'}</b><br>زمان: ${clock(G.t)}`;
+  }
+  let lastHint = '';
+  function updateHint() {
+    let h;
+    const st = s => G.slots.some(x => x.state === s);
+    if (G.selected) h = 'حالا روی <b>کارتن سفارش درست</b> بزن';
+    else if (st('taping')) h = 'انگشتت را <b>روی کارتن</b> از این سر تا آن سر بکش تا چسب بخورد';
+    else if (st('closed')) h = 'کارتن کامل شد! <b>«چسب بزن بره»</b> را بزن';
+    else if (st('ropen')) h = 'فقط کالاهای علامت‌دار <b>↩</b> را بردار و روی نوار بگذار';
+    else if (st('rclosed')) h = 'مرجوعی رسید! چسب کارتن را <b>باز کن</b>';
+    else h = 'کالا را از نوار بکش و داخل <b>کارتن سفارش درست</b> رها کن';
+    if (h !== lastHint) { $('hint').innerHTML = `<span>${h}</span>`; lastHint = h; }
+  }
+
+  // ---------------- end of hand: «پایان شیفت» ----------------
+  function endHand() {
+    if (G.over) return;
+    G.over = true; G.paused = true;
+    closeModal();
+    store.set('bestDone', Math.max(store.get('bestDone', 0), G.done));   // for the title badges
+    cancelAnimationFrame(rafId);
+    G.belt.forEach(b => b.el.remove());
+    const final = Math.max(0, G.score - penalties());
+    const earned = Math.floor(final / 100) + G.titleCoins;
+    coins += earned; saveCoins();
+    day.scores.push(final); saveDay(day);
+    const cum = day.scores.reduce((a, b) => a + b, 0);
+    const prevBest = store.get('best', 0);
+    const isBest = final > prevBest;
+    if (isBest) store.set('best', final);
+    const streak = updateStreak();
+
+    $('eHead').textContent = isBest && final > 0 ? '🏆 رکورد جدید!' : 'پایان دست';
+    $('eScore').textContent = fa(final);
+    $('eSub').textContent = `دست ${fa(day.hands)} از ${fa(CHANCES_PER_DAY)} امروز` + (G.boostersUsed ? ` · با ${fa(G.boostersUsed)} تقویت‌کننده` : '');
+    $('eDone').textContent = fa(G.done);
+    $('eTime').textContent = clock(G.t);
+    $('eTitle').textContent = G.done > 20 ? 'افسانه‌ای ∞' : (G.title || '—');
+    $('eGold').textContent = G.goldenPts ? fa(G.goldenPts) : (day.goldenSpawned ? '—' : 'هنوز نیامده');
+    $('eCoins').textContent = fa(earned);
+    $('eCum').textContent = fa(cum);
+    $('eBest').textContent = fa(Math.max(prevBest, final));
+    $('eStreak').textContent = fa(streak) + ' روز';
+    const bd = G.bd;
+    const rows = [
+      ['امتیاز پایه‌ی سفارش‌ها', bd.base], ['پاداش سرعت', bd.speed], ['پاداش سفارش سریع', bd.express],
+      ['ضریب سفارش طلایی', bd.golden], ['کمبوی بدون اشتباه', bd.combo], ['امتیاز دوبرابر', bd.double],
+      [`جریمه‌ی تقویت‌کننده (${fa(G.boostersUsed)}×)`, -G.boostersUsed * BOOSTER_PENALTY || 0],
+      [`جریمه‌ی ازدست‌دادن جان (${fa(G.livesLost)}×)`, -G.livesLost * LIFE_PENALTY || 0],
+    ];
+    $('eBreak').innerHTML = rows.map(([k, v]) => `<div class="${v < 0 ? 'neg' : ''}"><span>${k}</span><b>${v < 0 ? '<bdi dir="ltr">−' + fa(-v) + '</bdi>' : fa(v)}</b></div>`).join('')
+      + `<div class="tot"><span>امتیاز دست</span><span>${fa(final)}</span></div>`;
+    const { rank, html } = leaderboard(cum);
+    $('eRank').textContent = fa(rank);
+    $('eLb').innerHTML = html;
+    $('eChances').innerHTML = dotsHTML();
+    const left = CHANCES_PER_DAY - day.hands;
+    $('btnNext').disabled = left <= 0;
+    $('btnNext').textContent = left > 0 ? `دست بعدی (${fa(left)} فرصت)` : 'فرصت‌های امروز تمام شد — فردا برگرد';
+    show('scrEnd');
+    if (isBest || G.done >= 5) confetti(70);
+  }
+
+  function updateStreak() {
+    const last = store.get('lastDay', null);
+    let s = store.get('streak', 0);
+    if (last !== localDate()) { s = last === localDate(-1) ? s + 1 : 1; store.set('lastDay', localDate()); store.set('streak', s); }
+    return s;
+  }
+
+  // ponytail: simulated daily board seeded by date; swap for a real leaderboard API
+  function leaderboard(myScore) {
+    const names = ['مهسا', 'آرش', 'نیلوفر', 'پارسا', 'سارا', 'امیر', 'کیانا', 'رضا', 'یاسمن', 'بهراد', 'مریم', 'سینا', 'ترانه', 'حامد', 'الناز', 'کامران', 'شیدا', 'نیما', 'هستی', 'فرهاد'];
+    let seed = [...localDate()].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0;
+    const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32;
+    const board = names.map(n => ({ n, s: Math.round((400 + rnd() ** 1.8 * 6500) / 10) * 10 }));
+    board.push({ n: 'تو', s: myScore, me: true });
+    board.sort((a, b) => b.s - a.s);
+    const rank = board.findIndex(r => r.me) + 1;
+    const row = (r, i) => `<div class="lb-row ${r.me ? 'me' : ''}"><span class="r">${fa(i + 1)}</span><span class="n">${r.n}</span><span class="s">${fa(r.s)}</span></div>`;
+    let html = board.slice(0, 5).map(row).join('');
+    if (rank > 5) html += '<div class="lb-gap">⋮</div>' + row(board[rank - 1], rank - 1);
+    return { rank, html };
+  }
+
+  // ---------------- screens / ui ----------------
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+    if (id === 'scrStart') renderStart();
+  }
+  const dotsHTML = () => `<span class="dots">${Array.from({ length: CHANCES_PER_DAY }, (_, i) => `<i class="${i < day.hands ? 'used' : ''}"></i>`).join('')}</span> ${fa(Math.max(0, CHANCES_PER_DAY - day.hands))} باقی‌مانده`;
+  function renderStart() {
+    day = loadDay();
+    $('sChances').innerHTML = dotsHTML();
+    $('sGolden').innerHTML = day.goldenScore ? `<span class="gold-txt">✅ گرفتی (+${fa(day.goldenScore)})</span>`
+      : day.goldenSpawned ? 'امروز آمد و رفت' : '<span class="gold-txt">در یکی از دست‌های امروز پنهان است</span>';
+    $('sCum').textContent = fa(day.scores.reduce((a, b) => a + b, 0));
+    $('sBest').textContent = fa(store.get('best', 0));
+    const best = store.get('bestDone', 0);
+    $('sTitles').innerHTML = [...TITLES, { at: '∞', name: 'رکورد' }].map(t =>
+      `<div class="tb ${typeof t.at === 'number' && best >= t.at ? 'got' : ''}"><b>${typeof t.at === 'number' ? fa(t.at) : t.at}</b>${t.name}</div>`).join('');
+    const left = CHANCES_PER_DAY - day.hands;
+    $('btnStart').disabled = left <= 0 || !ITEMS.length;
+    $('btnStart').textContent = left > 0 ? 'شروع شیفت' : 'فرصت‌های امروز تمام شد — فردا برگرد';
+  }
+  let toastT;
+  function toast(html, bad = false) {
+    const el = $('toast');
+    el.innerHTML = html; el.classList.toggle('bad', bad); el.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 1700);
+  }
+  function modal(title, text, buttons) {
+    $('mTitle').textContent = title; $('mText').textContent = text;
+    $('mBtns').innerHTML = '';
+    buttons.forEach(b => {
+      const el = document.createElement('button');
+      el.className = b.primary ? 'btn-primary' : 'btn-ghost';
+      el.textContent = b.text;
+      el.onclick = () => { closeModal(); b.fn(); };
+      $('mBtns').appendChild(el);
+    });
+    $('modal').classList.add('show');
+  }
+  const closeModal = () => $('modal').classList.remove('show');
+  function confetti(n) {
+    const colors = ['#ef394e', '#f9a825', '#00a049', '#2979ff', '#c98d4f'];
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement('div'); c.className = 'confetti';
+      c.style.left = Math.random() * 100 + '%'; c.style.background = colors[i % 5];
+      c.style.animationDuration = 1.6 + Math.random() * 1.6 + 's'; c.style.animationDelay = Math.random() * .4 + 's';
+      $('app').appendChild(c); setTimeout(() => c.remove(), 3800);
+    }
+  }
+  function pause() {
+    if (!G || G.over || G.paused) return;
+    G.paused = true;
+    modal('توقف', 'بازی متوقف شد.', [
+      { text: 'ادامه', primary: true, fn: () => { G.paused = false; } },
+      { text: 'پایان این دست و ثبت نتیجه', fn: endHand },
+    ]);
+  }
+
+  $('btnStart').onclick = () => { if (CHANCES_PER_DAY - loadDay().hands > 0) { day = loadDay(); newGame(); } };
+  $('btnNext').onclick = () => { day = loadDay(); if (CHANCES_PER_DAY - day.hands > 0) newGame(); };
+  $('btnHome').onclick = () => show('scrStart');
+  $('btnPause').onclick = pause;
+  $('btnShare').onclick = async () => {
+    const text = `توی «مرکز بسته‌بندی» دیجی‌کالا ${fa(G.done)} سفارش بسته‌بندی کردم و ${$('eScore').textContent} امتیاز گرفتم! 📦 تو چندتا می‌زنی؟`;
+    try { if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); toast('متن نتیجه کپی شد ✔'); } } catch { toast(text); }
+  };
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+  window.addEventListener('resize', () => G && G.belt.forEach(positionBeltItem));
+
+  saveCoins();
+  renderStart();
+  if (location.hash === '#debug') window.__pk = { get G() { return G; }, placeItem, returnOut, finishOrder, step, spawnBelt, newOrder, remainingNeed };
+})();
+</script>
+</body>
+</html>

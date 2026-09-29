@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>پازل کشویی دیجی‌کالا</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #ef394e; --green: #00a049; --amber: #f9a825;
+    --bg: #f1f2f4; --text: #23254e; --muted: #81858b; --line: #e0e0e2;
+    --board: min(calc(100vw - 32px), 398px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: Vazirmatn, Tahoma, sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; user-select: none; }
+  button { font-family: inherit; cursor: pointer; border: 0; }
+  .app { width: 100%; max-width: 430px; min-height: 100%; display: flex; flex-direction: column; padding: 12px 16px 20px; position: relative; overflow: hidden; }
+  .screen { display: none; flex-direction: column; flex: 1; }
+  .screen.active { display: flex; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .logo { font-weight: 900; color: var(--red); font-size: 20px; }
+  .logo small { color: var(--text); font-weight: 600; font-size: 13px; margin-right: 6px; }
+  .coins { display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 99px; padding: 5px 12px 5px 8px; font-weight: 800; font-size: 14px; }
+  .coin-ico { width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe082, #f9a825 60%, #e08e00); display: inline-grid; place-items: center; color: #7a4d00; font-size: 11px; font-weight: 900; }
+
+  /* start */
+  .hero { background: linear-gradient(160deg, #6a3de8, #ef394e); color: #fff; border-radius: 24px; padding: 22px; }
+  .hero h1 { margin: 0 0 6px; font-size: 28px; font-weight: 900; }
+  .hero p { margin: 0; line-height: 1.9; font-size: 13px; opacity: .95; }
+  .chips { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .chip { background: rgba(255,255,255,.2); border-radius: 99px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+  .daily { background: #fff; border-radius: 18px; padding: 12px; margin-top: 12px; }
+  .daily .head { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 800; margin-bottom: 8px; }
+  .daily .head span { color: var(--muted); font-weight: 600; font-size: 12px; }
+  .daily .preview { width: 100%; height: 150px; border-radius: 12px; background: #ddd center/cover; filter: blur(14px) saturate(1.2); transform: scale(.98); }
+  .preview-wrap { overflow: hidden; border-radius: 12px; position: relative; }
+  .preview-wrap::after { content: "🔒 تصویر بعد از حل پازل رو می‌شود"; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 14px; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+  .goals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .goal { background: #fff; border-radius: 14px; padding: 10px 6px; text-align: center; font-size: 11px; color: var(--muted); }
+  .goal b { display: block; font-size: 14px; color: var(--text); margin-bottom: 2px; }
+  .sizes { background: #fff; border-radius: 18px; padding: 12px; margin-top: 12px; }
+  .sizes .head { font-size: 13px; font-weight: 800; margin-bottom: 8px; }
+  .size-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .size-opt { background: var(--bg); border-radius: 14px; padding: 10px 4px; font-size: 11px; color: var(--muted); border: 2px solid transparent; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .size-opt b { font-size: 18px; color: var(--text); }
+  .size-opt .mini { display: grid; gap: 2px; width: 34px; height: 34px; }
+  .size-opt .mini i { background: #c9cbd3; border-radius: 2px; }
+  .size-opt.sel { border-color: var(--red); background: #fff1f3; }
+  .size-opt.sel .mini i { background: var(--red); }
+  .spacer { flex: 1; min-height: 14px; }
+  .btn-primary { background: var(--red); color: #fff; font-size: 17px; font-weight: 800; border-radius: 14px; padding: 15px; width: 100%; box-shadow: 0 6px 16px rgba(239,57,78,.35); }
+  .btn-primary:active { transform: scale(.97); }
+  .btn-ghost { background: #fff; color: var(--text); font-weight: 700; border-radius: 14px; padding: 13px; width: 100%; font-size: 14px; }
+  .link-btn { background: none; color: var(--muted); font-size: 12px; margin-top: 8px; text-decoration: underline; }
+
+  /* game */
+  .hud { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .hud div { background: #fff; border-radius: 14px; padding: 8px; text-align: center; font-size: 11px; color: var(--muted); }
+  .hud b { display: block; font-size: 20px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .board { --n: 5; width: var(--board); height: var(--board); position: relative; margin: 0 auto; border-radius: 14px; background: #d9dadf; direction: ltr; overflow: hidden; }
+  .tile {
+    position: absolute; width: calc(100% / var(--n) - 2px); height: calc(100% / var(--n) - 2px); margin: 1px;
+    background-size: calc(var(--n) * 100%) calc(var(--n) * 100%); border-radius: 4px; cursor: pointer;
+    transition: left .14s ease-out, top .14s ease-out, box-shadow .2s;
+  }
+  .tile.ok { box-shadow: inset 0 0 0 2px var(--green); }
+  .tile.pop { animation: pop .35s; }
+  @keyframes pop { 50% { transform: scale(1.08); } }
+  .tile.blank { display: none; }
+  .board.done .tile { width: calc(100% / var(--n)); height: calc(100% / var(--n)); margin: 0; border-radius: 0; box-shadow: none !important; }
+  .board.done .tile.blank { display: block; animation: fadein .6s; }
+  @keyframes fadein { from { opacity: 0; } }
+  .overlay { position: absolute; inset: 0; background: center/cover; display: none; z-index: 5; }
+  .overlay.show { display: block; }
+  .overlay .count { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.6); color: #fff; font-weight: 900; border-radius: 99px; padding: 2px 12px; font-size: 14px; }
+  .rowpick { position: absolute; inset: 0; display: none; flex-direction: column; z-index: 6; }
+  .rowpick.show { display: flex; }
+  .rowpick button { flex: 1; margin: 1px; background: rgba(35,37,78,.55); color: #fff; font-weight: 800; font-size: 14px; border-radius: 6px; }
+  .rowpick button:hover { background: rgba(239,57,78,.7); }
+  .rowpick button:disabled { background: rgba(0,160,73,.45); cursor: default; }
+  .hint-text { text-align: center; font-size: 12px; color: var(--muted); margin: 10px 0 0; min-height: 20px; }
+  .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .tool { background: #fff; border-radius: 14px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--text); }
+  .tool .ico { font-size: 20px; }
+  .tool .cost { display: flex; align-items: center; gap: 3px; font-weight: 900; font-size: 12px; }
+  .tool .cost .coin-ico { width: 15px; height: 15px; font-size: 8px; }
+  .tool:disabled { opacity: .4; cursor: default; }
+
+  .toast { position: absolute; top: 70px; left: 50%; transform: translate(-50%, -30px); background: var(--text); color: #fff; padding: 10px 18px; border-radius: 14px; font-weight: 800; font-size: 13px; opacity: 0; pointer-events: none; transition: all .3s; z-index: 50; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* end */
+  .end-head { text-align: center; padding: 6px 0; }
+  .end-head h2 { margin: 0 0 2px; font-size: 24px; font-weight: 900; }
+  .end-head p { margin: 0; color: var(--muted); font-size: 13px; }
+  .final-img { width: 100%; aspect-ratio: 1; border-radius: 16px; background: center/cover; margin-top: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+  .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .stat { background: #fff; border-radius: 14px; padding: 10px 12px; }
+  .stat .k { font-size: 11px; color: var(--muted); }
+  .stat .v { font-size: 18px; font-weight: 900; margin-top: 2px; }
+  .stat.wide { grid-column: span 2; }
+  .stat .sub { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .rank-bar { height: 8px; background: #eee; border-radius: 99px; margin-top: 8px; overflow: hidden; }
+  .rank-bar div { height: 100%; width: 0; background: linear-gradient(270deg, var(--amber), var(--red)); transition: width 1s; }
+  .end-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .end-actions .btn-primary { grid-column: span 2; }
+
+  .confetti { position: absolute; top: -10px; width: 8px; height: 14px; z-index: 60; pointer-events: none; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="topbar">
+    <a class="logo" href="../" style="text-decoration:none" title="بازگشت به همه‌ی بازی‌ها">‹ دیجی‌کالا<small>پازل کشویی</small></a>
+    <div class="coins"><span class="coin-ico">D</span><span id="coinCount">۰</span></div>
+  </div>
+
+  <!-- START -->
+  <section class="screen active" id="scrStart">
+    <div class="hero">
+      <h1>پازل کشویی</h1>
+      <p>یک تصویر از دیجی‌کالا به قطعه‌هایی + یک خانه‌ی خالی تقسیم شده. قطعه‌های کنار خانه‌ی خالی را جابه‌جا کن تا تصویر کامل شود. هیچ شماره یا راهنمایی روی قطعه‌ها نیست!</p>
+      <div class="chips"><span class="chip">🧠 فکری</span><span class="chip">۳×۳ تا ۵×۵</span><span class="chip">⏱ بدون محدودیت زمان</span></div>
+    </div>
+    <div class="daily">
+      <div class="head">🗓 پازل امروز <span id="todayLabel"></span></div>
+      <div class="preview-wrap"><div class="preview" id="preview"></div></div>
+    </div>
+    <div class="sizes">
+      <div class="head">🧩 اندازه‌ی پازل را انتخاب کن</div>
+      <div class="size-opts" id="sizeOpts"></div>
+    </div>
+    <div class="goals">
+      <div class="goal"><b>هدف ۱</b>کمترین حرکت</div>
+      <div class="goal"><b>هدف ۲</b>کوتاه‌ترین زمان</div>
+      <div class="goal"><b>هدف ۳</b>کمترین کمک</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn-primary" id="btnStart">شروع پازل</button>
+    <button class="link-btn" id="btnOther">یک پازل دیگر امتحان کن</button>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="scrGame">
+    <div class="hud">
+      <div><b id="hMoves">۰</b>حرکت</div>
+      <div><b id="hTime">۰۰:۰۰</b>زمان</div>
+      <div><b id="hOk">۰</b>قطعه سر جایش</div>
+    </div>
+    <div class="board" id="board">
+      <div class="overlay" id="overlay"><span class="count" id="ovCount"></span></div>
+      <div class="rowpick" id="rowpick"></div>
+    </div>
+    <div class="hint-text" id="hintText"></div>
+    <div class="tools">
+      <button class="tool" id="tPlace"><span class="ico">🧩</span>قرار دادن یک قطعه<span class="cost">۲ <span class="coin-ico">D</span></span></button>
+      <button class="tool" id="tRow"><span class="ico">➖</span>تکمیل یک ردیف<span class="cost">۱۰ <span class="coin-ico">D</span></span></button>
+      <button class="tool" id="tPeek"><span class="ico">🖼</span>نمایش تصویر کامل<span class="cost">۱۰ <span class="coin-ico">D</span></span></button>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section class="screen" id="scrEnd">
+    <div class="end-head">
+      <h2>🎉 پازل کامل شد!</h2>
+      <p id="eSub"></p>
+    </div>
+    <div class="final-img" id="eImg"></div>
+    <div class="grid-stats">
+      <div class="stat"><div class="k">تعداد حرکت نهایی</div><div class="v" id="eMoves"></div></div>
+      <div class="stat"><div class="k">زمان تکمیل</div><div class="v" id="eTime"></div></div>
+      <div class="stat"><div class="k">دیجی‌کوین دریافتی</div><div class="v" id="eCoins"></div></div>
+      <div class="stat"><div class="k">استریک روزانه</div><div class="v" id="eStreak"></div></div>
+      <div class="stat wide">
+        <div class="k">مقایسه با دیگران</div>
+        <div class="v" id="eRank"></div>
+        <div class="sub" id="eHints"></div>
+        <div class="rank-bar"><div id="eRankBar"></div></div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="end-actions">
+      <button class="btn-ghost" id="btnShare">اشتراک‌گذاری نتیجه</button>
+      <button class="btn-ghost" id="btnHome">خانه</button>
+      <button class="btn-primary" id="btnAgain">پازل بعدی</button>
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="../wallet.js"></script>
+<script>
+(() => {
+  let N, CELLS, BLANK;
+  const setSize = n => { N = n; CELLS = n * n; BLANK = CELLS - 1; };
+  const COST = { place: 2, row: 10, peek: 10 };
+  // ponytail: guessed typical move counts per size, drives the simulated ranking + hint penalty
+  const MEDIAN = { 3: 30, 4: 120, 5: 260 };
+  const hintPenalty = () => Math.round(MEDIAN[N] * 0.15); // moves added to score per hint
+  // Digikala home-page banners; x = horizontal focus (%) for the square crop
+  const IMAGES = [
+    { src: 'img/b0.jpg', x: 40 }, { src: 'img/b3.jpg', x: 44 }, { src: 'img/b7.jpg', x: 44 },
+    { src: 'img/b8.jpg', x: 48 }, { src: 'img/b10.jpg', x: 44 }, { src: 'img/b15.jpg', x: 15 },
+    { src: 'img/b17.jpg', x: 20 }, { src: 'img/b18.jpg', x: 15 }, { src: 'img/b20.jpg', x: 42 },
+    { src: 'img/b21.jpg', x: 45 }, { src: 'img/b22.jpg', x: 18 },
+  ];
+
+  const $ = id => document.getElementById(id);
+  const fa = n => Number(n).toLocaleString('fa-IR');
+  const clock = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`.replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('pz_' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem('pz_' + k, JSON.stringify(v)); } catch {} },
+  };
+  let coins = Wallet.get();
+  let size = store.get('size', 5);
+  const saveCoins = () => { Wallet.set(coins); $('coinCount').textContent = fa(coins); };
+
+  const dayIndex = Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
+  let imgIdx = dayIndex % IMAGES.length;
+  let imgURL = '';
+
+  // Crop the banner to a square once, so tiles can use plain background-position
+  function loadSquare(i) {
+    return new Promise(res => {
+      const im = new Image();
+      im.onload = () => {
+        const side = Math.min(im.width, im.height), size = 600;
+        const sx = (im.width - side) * IMAGES[i].x / 100, sy = (im.height - side) / 2;
+        const c = document.createElement('canvas'); c.width = c.height = size;
+        c.getContext('2d').drawImage(im, sx, sy, side, side, 0, 0, size, size);
+        res(c.toDataURL('image/jpeg', .9));
+      };
+      im.src = IMAGES[i].src;
+    });
+  }
+
+  // ---------- puzzle logic (board[pos] = tile id, tile BLANK is the empty cell) ----------
+  const neighbors = p => [p - N, p + N, p % N ? p - 1 : -1, p % N < N - 1 ? p + 1 : -1].filter(q => q >= 0 && q < CELLS);
+  // Odd width: solvable <=> even inversions. Even width: inversions + blank row must match the solved board's parity
+  function solvable(b) {
+    const t = b.filter(x => x !== BLANK);
+    let inv = 0;
+    for (let i = 0; i < t.length; i++) for (let j = i + 1; j < t.length; j++) if (t[i] > t[j]) inv++;
+    if (N % 2) return inv % 2 === 0;
+    return (inv + Math.floor(b.indexOf(BLANK) / N)) % 2 === (N - 1) % 2;
+  }
+  function shuffled() {
+    const b = [...Array(CELLS).keys()];
+    let e = BLANK, prev = -1;
+    for (let k = 0; k < 600; k++) {
+      const opts = neighbors(e).filter(q => q !== prev);
+      const q = opts[Math.floor(Math.random() * opts.length)];
+      [b[e], b[q]] = [b[q], b[e]]; prev = e; e = q;
+    }
+    return correctCount(b) > Math.max(1, Math.floor(CELLS / 8)) ? shuffled() : b;
+  }
+  const correctCount = b => b.filter((t, p) => t === p && t !== BLANK).length;
+  // Put each tile in `tiles` into its home cell via swaps, then repair parity with a swap elsewhere
+  function forcePlace(b, tiles) {
+    for (const t of tiles) { const p = b.indexOf(t); [b[p], b[t]] = [b[t], b[p]]; }
+    if (!solvable(b)) {
+      const free = [...Array(CELLS).keys()].filter(p => b[p] !== BLANK && !tiles.includes(p));
+      const wrong = free.filter(p => b[p] !== p);
+      const pair = wrong.length >= 2 ? wrong.slice(0, 2) : [...wrong, ...free.filter(p => !wrong.includes(p))].slice(0, 2);
+      [b[pair[0]], b[pair[1]]] = [b[pair[1]], b[pair[0]]];
+    }
+    return b;
+  }
+
+  // ---------- game state ----------
+  let board, moves, hints, spent, started, t0, timerId, tiles = [], done;
+
+  async function startGame() {
+    setSize(size);
+    $('board').style.setProperty('--n', N);
+    imgURL = await loadSquare(imgIdx);
+    board = shuffled(); moves = 0; hints = 0; spent = 0; started = false; done = false;
+    clearInterval(timerId); $('hTime').textContent = clock(0);
+    const el = $('board');
+    el.classList.remove('done');
+    tiles.forEach(t => t.remove());
+    tiles = [];
+    for (let t = 0; t < CELLS; t++) {
+      const d = document.createElement('div');
+      d.className = 'tile' + (t === BLANK ? ' blank' : '');
+      d.style.backgroundImage = `url(${imgURL})`;
+      d.style.backgroundPosition = `${(t % N) * 100 / (N - 1)}% ${Math.floor(t / N) * 100 / (N - 1)}%`;
+      d.onclick = () => tap(board.indexOf(t));
+      el.appendChild(d); tiles.push(d);
+    }
+    $('overlay').style.backgroundImage = `url(${imgURL})`;
+    buildRowPicker();
+    show('scrGame');
+    render();
+  }
+
+  function render(popTiles = []) {
+    board.forEach((t, p) => {
+      const d = tiles[t];
+      d.style.left = (p % N) * 100 / N + '%';
+      d.style.top = Math.floor(p / N) * 100 / N + '%';
+      const ok = t === p && t !== BLANK;
+      if (ok && !d.classList.contains('ok')) popTiles.push(t);
+      d.classList.toggle('ok', ok);
+    });
+    popTiles.forEach(t => { tiles[t].classList.remove('pop'); void tiles[t].offsetWidth; tiles[t].classList.add('pop'); });
+    $('hMoves').textContent = fa(moves);
+    $('hOk').textContent = fa(correctCount(board)) + '/' + fa(BLANK);
+    $('tPlace').disabled = coins < COST.place;
+    $('tRow').disabled = coins < COST.row;
+    $('tPeek').disabled = coins < COST.peek;
+    if (board.every((t, p) => t === p)) win();
+  }
+
+  function tap(p) {
+    if (done) return;
+    const e = board.indexOf(BLANK);
+    if (!neighbors(e).includes(p)) return;
+    [board[e], board[p]] = [board[p], board[e]];
+    moves++;
+    if (!started) { started = true; t0 = Date.now(); timerId = setInterval(() => $('hTime').textContent = clock(elapsed()), 250); }
+    render();
+  }
+  const elapsed = () => started ? Math.floor((Date.now() - t0) / 1000) : 0;
+
+  // ---------- tools ----------
+  function pay(kind) {
+    if (done || coins < COST[kind]) return false;
+    coins -= COST[kind]; spent += COST[kind]; hints++; saveCoins();
+    return true;
+  }
+  $('tPlace').onclick = () => {
+    const wrong = [...Array(BLANK).keys()].filter(t => board[t] !== t);
+    if (!wrong.length || !pay('place')) return;
+    forcePlace(board, [wrong[Math.floor(Math.random() * wrong.length)]]);
+    toast('🧩 یک قطعه سر جایش رفت (بدون شمارش حرکت)');
+    render();
+  };
+  const DEFAULT_HINT = 'روی قطعه‌ی کنار خانه‌ی خالی بزن (یا از کلیدهای جهت استفاده کن)';
+  function buildRowPicker() {
+    $('hintText').textContent = DEFAULT_HINT;
+    const rp = $('rowpick'); rp.innerHTML = '';
+    for (let r = 0; r < N; r++) {
+      const b = document.createElement('button');
+      b.textContent = `ردیف ${fa(r + 1)}`;
+      b.onclick = () => {
+        rp.classList.remove('show'); $('hintText').textContent = DEFAULT_HINT;
+        if (!pay('row')) return;
+        forcePlace(board, [...Array(N).keys()].map(c => r * N + c));
+        toast(`➖ ردیف ${fa(r + 1)} کامل شد`);
+        render();
+      };
+      rp.appendChild(b);
+    }
+    rp.onclick = e => { if (e.target === rp) { rp.classList.remove('show'); $('hintText').textContent = DEFAULT_HINT; } };
+  }
+  $('tRow').onclick = () => {
+    if (done || coins < COST.row) return;
+    const rp = $('rowpick');
+    [...rp.children].forEach((b, r) => b.disabled = [...Array(N).keys()].every(c => board[r * N + c] === r * N + c));
+    rp.classList.toggle('show');
+    $('hintText').textContent = rp.classList.contains('show') ? 'ردیفی که می‌خواهی کامل شود را انتخاب کن' : DEFAULT_HINT;
+  };
+  $('tPeek').onclick = () => {
+    if (!pay('peek')) return;
+    const ov = $('overlay'); ov.classList.add('show');
+    let s = 5; $('ovCount').textContent = fa(s);
+    const id = setInterval(() => { if (--s <= 0) { clearInterval(id); ov.classList.remove('show'); } $('ovCount').textContent = fa(s); }, 1000);
+    render();
+  };
+  document.addEventListener('keydown', e => {
+    if (!$('scrGame').classList.contains('active')) return;
+    const eIdx = board.indexOf(BLANK);
+    // arrow moves the tile *into* the blank, so the tile sits on the opposite side
+    const d = { ArrowUp: N, ArrowDown: -N, ArrowLeft: 1, ArrowRight: -1 }[e.key];
+    if (d === undefined) return;
+    e.preventDefault();
+    const p = eIdx + d;
+    if (p >= 0 && p < CELLS && (Math.abs(d) === N || Math.floor(p / N) === Math.floor(eIdx / N))) tap(p);
+  });
+
+  // ---------- win ----------
+  function win() {
+    if (done) return;
+    done = true; clearInterval(timerId);
+    $('board').classList.add('done');
+    $('rowpick').classList.remove('show');
+    const secs = elapsed();
+    const score = moves + hints * hintPenalty();
+    const base = { 3: 10, 4: 20, 5: 30 }[N];
+    const reward = Math.max(3, Math.round(base * Math.min(1, MEDIAN[N] / score)) - hints * 2);
+    coins += reward; saveCoins();
+    const best = store.get('best' + N, null);
+    const isBest = !best || score < best.score;
+    if (isBest) store.set('best' + N, { score, moves, secs });
+    const streak = updateDayStreak();
+    confetti(80);
+
+    setTimeout(() => {
+      $('eImg').style.backgroundImage = `url(${imgURL})`;
+      $('eSub').textContent = isBest ? 'رکورد شخصی جدید! 🔥' : `بهترین رکورد تو: ${fa(best.moves)} حرکت`;
+      $('eMoves').textContent = fa(moves);
+      $('eTime').textContent = clock(secs);
+      $('eCoins').textContent = fa(reward);
+      $('eStreak').textContent = fa(streak) + ' روز';
+      // ponytail: simulated player distribution until a real leaderboard backend exists
+      const beat = Math.round(100 / (1 + Math.exp((score - MEDIAN[N]) / (MEDIAN[N] * 0.27))));
+      $('eRank').textContent = `بهتر از ${fa(beat)}٪ بازیکنان امروز در ${fa(N)}×${fa(N)}`;
+      $('eHints').textContent = hints ? `${fa(hints)} کمک استفاده شد (${fa(spent)} دیجی‌کوین)، هر کمک ${fa(hintPenalty())} حرکت جریمه در لیدربورد` : 'بدون هیچ کمکی 💪 در لیدربورد «بدون کمک» ثبت شدی';
+      show('scrEnd');
+      setTimeout(() => $('eRankBar').style.width = beat + '%', 100);
+      confetti(60);
+    }, 1400);
+  }
+
+  function updateDayStreak() {
+    const last = store.get('lastDay', null);
+    let ds = store.get('dayStreak', 0);
+    if (last !== dayIndex) { ds = last === dayIndex - 1 ? ds + 1 : 1; store.set('lastDay', dayIndex); store.set('dayStreak', ds); }
+    return ds;
+  }
+
+  // ---------- ui helpers ----------
+  function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id)); }
+  let toastT;
+  function toast(msg) { const el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 1800); }
+  function confetti(n) {
+    const colors = ['#ef394e', '#f9a825', '#00a049', '#2979ff', '#6a3de8'];
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement('div'); c.className = 'confetti';
+      c.style.left = Math.random() * 100 + '%'; c.style.background = colors[i % 5];
+      c.style.animationDuration = 1.6 + Math.random() * 1.6 + 's'; c.style.animationDelay = Math.random() * .4 + 's';
+      $('app').appendChild(c); setTimeout(() => c.remove(), 3800);
+    }
+  }
+  async function showPreview() { $('preview').style.backgroundImage = `url(${await loadSquare(imgIdx)})`; }
+
+  const SIZES = [{ n: 3, label: 'آسان' }, { n: 4, label: 'متوسط' }, { n: 5, label: 'سخت' }];
+  function renderSizes() {
+    $('sizeOpts').innerHTML = SIZES.map(s => `
+      <button class="size-opt ${s.n === size ? 'sel' : ''}" data-n="${s.n}">
+        <span class="mini" style="grid-template-columns:repeat(${s.n},1fr)">${'<i></i>'.repeat(s.n * s.n)}</span>
+        <b>${fa(s.n)}×${fa(s.n)}</b>${s.label}<br>${fa(s.n * s.n - 1)} قطعه
+      </button>`).join('');
+    $('sizeOpts').querySelectorAll('button').forEach(b => b.onclick = () => { size = +b.dataset.n; store.set('size', size); renderSizes(); });
+  }
+  renderSizes();
+
+  $('btnStart').onclick = startGame;
+  $('btnOther').onclick = () => { imgIdx = (imgIdx + 1) % IMAGES.length; showPreview(); };
+  $('btnAgain').onclick = () => { imgIdx = (imgIdx + 1) % IMAGES.length; startGame(); };
+  $('btnHome').onclick = () => { showPreview(); show('scrStart'); };
+  $('btnShare').onclick = async () => {
+    const text = `پازل کشویی ${fa(N)}×${fa(N)} امروز دیجی‌کالا رو با ${fa(moves)} حرکت در ${clock(elapsed())} حل کردم${hints ? '' : ' — بدون کمک!'} 🧩`;
+    try { if (navigator.share) await navigator.share({ text }); else { await navigator.clipboard.writeText(text); toast('متن نتیجه کپی شد ✔'); } } catch { toast(text); }
+  };
+
+  $('todayLabel').textContent = new Date().toLocaleDateString('fa-IR', { weekday: 'long', day: 'numeric', month: 'long' });
+  saveCoins(); showPreview();
+
+  // Self-check: open with #test — shuffles and hint repairs must always stay solvable
+  if (location.hash === '#test') {
+    for (const n of [3, 4, 5]) for (let k = 0; k < 200; k++) {
+      setSize(n);
+      const b = shuffled();
+      console.assert(solvable(b), 'shuffle unsolvable');
+      const odd = [...b], [i, j] = [0, 1, 2].filter(p => odd[p] !== BLANK);
+      [odd[i], odd[j]] = [odd[j], odd[i]];
+      console.assert(!solvable(odd), 'swapped board should be unsolvable');
+      forcePlace(b, [Math.floor(Math.random() * BLANK)]);
+      console.assert(solvable(b), 'place broke parity');
+      const r = Math.floor(Math.random() * N);
+      forcePlace(b, [...Array(N).keys()].map(c => r * N + c));
+      console.assert(solvable(b) && [...Array(N).keys()].every(c => b[r * N + c] === r * N + c), 'row broke');
+    }
+    console.log('puzzle self-test done');
+  }
+})();
+</script>
+</body>
+</html>
